@@ -1,0 +1,23 @@
+{% extends '../templates/base/base.html' %}
+    {% block title %} Registro_Usuario {% endblock %}
+    
+    {% block content %}
+        {% if messages %}
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        {% endif %}
+        
+        <form method='POST'>
+            {% csrf_token %}
+            {{formulario.as_p}}
+            <label>Permisos de Usuario</label>
+            <select class="selectpicker" name="permisos" id="permisos">
+                {% for rol in roles %}
+                <option value="{{ rol.nombre_usuario }}">{{ rol.nombre_usuario }}</option>
+                {% endfor %}
+            </select>
+            
+            <button type='submit'>Guardar</button>
+        </form>
+    {% endblock %}

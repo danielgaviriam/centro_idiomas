@@ -9,8 +9,9 @@ https://docs.djangoproject.com/en/1.9/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
-
+from django.core.urlresolvers import reverse_lazy
 import os
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.registro_academico',
     'apps.inscripcion',
+    'apps.usuario',
+    'rolepermissions',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -58,7 +61,7 @@ ROOT_URLCONF = 'centro_idiomas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR,'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -133,3 +136,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+#Busqueda de archivos, Css,Js,Img,etc en folder Static
+STATICFILES_DIRS = (
+  os.path.join(BASE_DIR, 'static'),
+)
+
+
+#Funcion de Email
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'daga9420@gmail.com'
+EMAIL_HOST_PASSWORD = 'daniel94'
+EMAIL_PORT = 587
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+DEFAULT_FROM_EMAIL = 'daga9420@gmail.com'
+
+#Gestion de Permisos
+ROLEPERMISSIONS_MODULE = 'centro_idiomas.roles'
+
+LOGIN_REDIRECT_URL =  reverse_lazy('inscripcion:index')

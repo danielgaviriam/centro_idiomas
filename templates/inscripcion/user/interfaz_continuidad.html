@@ -1,0 +1,34 @@
+{% extends '../templates/base/base.html' %}
+
+{% block title %}Registro Solicitud{% endblock %}
+{% block content %}
+        {% if idiomas %}
+            {% for lista in lista_estudiante %}
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        {{lista.idioma}}
+                    </div>
+                    <div class="panel-body">
+                        <!--
+                        {% for nivel in niveles %}
+                            {% if lista.nivel == nivel %}
+                                
+                                
+                                {% if lista.nota >= 3 %}
+                                    <input type="button" disabled name="{{nivel}}" class="btn btn-success" />
+                                {% else %}
+                                
+                                {% endif %}
+                                
+                            {% else %}
+                            <h1>{{nivel}}</1>
+                            <h1>no lo curso</h1>
+                            {% endif %}
+                        {% endfor %}-->
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <h3>Actualmente no se encuentra matriculado en ningún curso</h3>
+        {% endif %}
+{% endblock %}

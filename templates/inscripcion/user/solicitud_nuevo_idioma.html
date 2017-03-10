@@ -1,0 +1,18 @@
+{% extends '../templates/base/base.html' %}
+
+{% block title %}Registro Solicitud{% endblock %}
+{% block content %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method='POST'>
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type='submit'>Guardar</button>
+        </form>
+{% endblock %}

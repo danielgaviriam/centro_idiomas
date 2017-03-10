@@ -1,0 +1,48 @@
+{% extends '../templates/base/base.html' %}
+    {% block title %} Confirmacion de Citas {% endblock %}
+    
+    {% block content %}
+    {% if citacion %}
+    {% for citas in citacion %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Fecha:</strong>{{citas.fecha_examen}}<br>
+                <strong>Sede:</strong>{{citas.sede}}<br>
+                <strong>Idioma:</strong>{{citas.idioma}}<br>
+                <strong>Tipo:</strong>{{citas.edad}}<br>
+                <strong>Cantidad:</strong>{{citas.numero_estudiantes}} estudiantes<br>
+            </div>
+            <div class="panel-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Identificacion</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pre_inscripcion %}
+                        {% for solicitudes in pre_inscripcion %}
+                            {% if solicitudes.sol_examen == True and citas.idioma == solicitudes.idioma and solicitudes.cita_creada == True %}
+                                <tr>
+                                    <td>{{solicitudes.nombres}} {{solicitudes.apellidos}}</td>
+                                    <td>{{solicitudes.num_identificacion}}</td>
+                                    <td>{{solicitudes.email}}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% else %}
+                                <p><font color="teal">No hay solicitudes para este idioma</font></p>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endfor %}
+    
+    {% else %}
+        <p><font color="teal">No hay citas!!!</font></p>
+    {% endif %}
+    <a href="{% url 'inscripcion:enviar_citas' %}"><input value="Enviar Citaciones" class="btn btn-success" type="button"></a>
+    {% endblock %}

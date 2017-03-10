@@ -1,0 +1,30 @@
+{% extends '../templates/base/base.html' %}
+    {% block title %} Login {% endblock %}
+{% block sesion %}
+{% endblock %}
+{% block content %}
+<div class="col-md-4 col-md-offset-4 text-center">
+    <h1>Centro de Extensión</h1>
+    <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        <div class="form-row">
+            {{ formulario.username.errors }}
+            {{ formulario.username.label_tag }} {{ formulario.username }}
+        </div>
+        <div class="form-row">
+            {{ formulario.password.errors }}
+            {{ formulario.password.label_tag }} {{ formulario.password }}
+            <input type="hidden" name="next" value="{{ next }}" />
+        </div><br>
+        <div class="submit-row">
+            <label>&nbsp;</label><input class="btn btn-primary" type="submit" />
+        </div>
+    </form> 
+</div>
+{% endblock %}

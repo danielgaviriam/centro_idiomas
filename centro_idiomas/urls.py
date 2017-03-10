@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """centro_idiomas URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -16,8 +17,14 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+#from django.contrib.auth.views import login
+from apps.usuario.views import inicio_sesion, index
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^inscripcion/', include('apps.inscripcion.urls', namespace="inscripcion")),
+    url(r'^usuarios/', include('apps.usuario.urls', namespace="usuario")),
+    
+    url(r'^$',inicio_sesion, name="login"),
+    url(r'^index/',index, name='index'),
 ]

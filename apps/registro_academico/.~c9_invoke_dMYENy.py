@@ -9,7 +9,6 @@ class Ciclo(models.Model):
     nombre = models.CharField(max_length=50)
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
-    estado_ciclo = models.BooleanField()
     
     def __str__(self):
         return '{}'.format(self.nombre)
@@ -97,22 +96,18 @@ class Curso(models.Model):
     edad = models.ForeignKey(Edad,null=True,blank=True)
     
     def __str__(self):
-        return '{} {} {}'.format(self.idioma, self.nivel, self.ciclo)
+        return '{} {} {} {}'.format(self.idioma, self.sede, self.nivel, self.jornada)
         
     def __unicode__(self):
-        return (""+str(self.nombre)+ " "+str(self.nivel)+ " "+str(self.ciclo))
+        return self.nombre
+
 
 from ..inscripcion.models import Persona
 
-class Matricula(models.Model):
+    nota = models.IntegerField()
     curso = models.ForeignKey(Curso,null=True,blank=True)
     persona = models.ForeignKey(Persona,null=True,blank=True)
-    nota = models.IntegerField(null=True,blank=True)
-    #El ciclo se puede extraer desde el curso
-    #ciclo = models.ForeignKey(Ciclo,null=True,blank=True)
-    
-    def __str__(self):
-        return '{} {}'.format(self.curso, self.persona)
+    nota = models.IntegerField()
 
 class Citacion(models.Model):
     fecha_examen = models.DateField(blank=True)
@@ -123,7 +118,7 @@ class Citacion(models.Model):
     numero_estudiantes = models.IntegerField()
     
     def __str__(self):
-        return '{} {} {} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad)
+        return '{} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad)
         
     def __unicode__(self):
         return self.salon
