@@ -1,0 +1,38 @@
+{% extends '../templates/base/base.html' %}
+
+{% block title %}Registro Solicitud{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-xs-8 col-sm-offset-2">
+            <ul class="nav nav-tabs">
+                <li><a id="tap_ingles" class="active">Ingles</a></li>
+                <li><a id="tap_frances" href="#">Frances</a></li>
+                <li><a id="tap_italiano" href="#">Italiano</a></li>
+                <li><a id="tap_portugues"href="#">Portugues</a></li>
+            </ul>
+            <br>
+            <div class="col-sm-4" style="background-color:lightcyan;">
+                <div class="list-group">
+                    <a href="#" class="list-group-item">First item</a>
+                    <a href="#" class="list-group-item">Second item</a>
+                    <a href="#" class="list-group-item">Third item</a>
+                </div>
+            </div>
+            <div class="col-sm-8" style="background-color:lightcyan;">.col-sm-8</div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    
+        <script type="text/javascript">
+        
+        function abrir_modal(id_idioma,id_nivel){
+            
+            var nivel = String(id_nivel)
+            var idioma = String(id_idioma)
+            document.getElementById('info').innerHTML = "<strong>Idioma</strong> <div id=idioma_need>".concat(idioma).concat("</div><br><strong>nivel</strong> <div id=nivel_need>").concat(nivel).concat("</div>");
+            $('#myModal').modal('show');
+        }
+        </script>
+{% endblock %}

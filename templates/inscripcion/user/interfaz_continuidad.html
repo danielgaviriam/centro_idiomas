@@ -1,34 +1,106 @@
 {% extends '../templates/base/base.html' %}
 
-{% block title %}Registro Solicitud{% endblock %}
+{% block title %}Solicitud de Continuación{% endblock %}
 {% block content %}
-        {% if idiomas %}
-            {% for lista in lista_estudiante %}
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        {{lista.idioma}}
-                    </div>
-                    <div class="panel-body">
-                        <!--
-                        {% for nivel in niveles %}
-                            {% if lista.nivel == nivel %}
-                                
-                                
-                                {% if lista.nota >= 3 %}
-                                    <input type="button" disabled name="{{nivel}}" class="btn btn-success" />
-                                {% else %}
-                                
-                                {% endif %}
-                                
-                            {% else %}
-                            <h1>{{nivel}}</1>
-                            <h1>no lo curso</h1>
-                            {% endif %}
-                        {% endfor %}-->
-                    </div>
+<div class="row">
+    <div class="col-sm-6 col-sm-offset-3">
+        <div id="informacion" style="display: none;" class="alert alert-danger">
+        </div>
+    {% if informacion %}
+    {% for info in informacion %} 
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                {{info.idioma}}
+            </div>
+            <div class="panel-body">
+                {% for nivel in info.niveles %}
+                    {% if nivel.nota >= 3 %}
+                        <input disabled type="button" value={{nivel.nivel}} class="btn btn-success" >
+                    {% endif %}
+                    {% if nivel.nota == -1 and nivel.disponible == True %}
+                        <input id ={{info.idioma}} type="button" value="{{nivel.nivel}}" class="btn btn-primary" onclick="abrir_modal(id,value)">
+                    {% endif %}
+                    {% if nivel.nota == -1 and nivel.disponible == False %}
+                        <input disabled type="button" value={{nivel.nivel}} class="btn btn-default">
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>    
+    {% endfor %}
+    {% else %}
+    <h1>no hay matriculas disponibles</h1>
+    {% endif %}
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Confirmación de continuidad</h4>
                 </div>
-            {% endfor %}
-        {% else %}
-            <h3>Actualmente no se encuentra matriculado en ningún curso</h3>
-        {% endif %}
+                <div class="modal-body">
+                    <p>Por medio del presente formato, confirmo que tomaré el próximo curso de extensión</p>
+                    <p id="info"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="agregar_solicitud()" id="agregar_continuidad" class="btn btn-success" >Agregar</button>
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>  
+    </div>
+</div>
+    
+    
 {% endblock %}
+
+{% block scripts %}
+    
+        <script type="text/javascript">
+        
+        function abrir_modal(id_idioma,id_nivel){
+            
+            var nivel = String(id_nivel)
+            var idioma = String(id_idioma)
+            document.getElementById('info').innerHTML = "<strong>Idioma</strong> <div id=idioma_need>".concat(idioma).concat("</div><br><strong>nivel</strong> <div id=nivel_need>").concat(nivel).concat("</div>");
+            $('#myModal').modal('show');
+        }
+        function agregar_solicitud(){
+        var identificador_idioma = document.getElementById('idioma_need').innerHTML;
+        var identificador_nivel = document.getElementById('nivel_need').innerHTML;
+        var url = "/inscripcion/agregar_continuidad/"
+        
+        $.ajax({
+           url: url,
+           data: {'identificador_idioma':identificador_idioma,'identificador_nivel':identificador_nivel,
+           },
+           type: 'GET',
+           success: function(response_data)
+           {
+               if(response_data == 1){
+                   document.getElementById("informacion").className = "alert alert-success";
+                   document.getElementById('informacion').style.display = 'block';
+                   document.getElementById('informacion').innerHTML = "Su solicitud ha sido agregada con exito"
+                   $('#myModal').modal('hide');
+               }
+               else if(response_data == -1){
+                   document.getElementById("informacion").className = "alert alert-info";
+                   document.getElementById('informacion').style.display = 'block';
+                   document.getElementById('informacion').innerHTML = "Su solicitud ya ha sido registrada"
+                   $('#myModal').modal('hide');
+                   
+               }
+               else{
+                   document.getElementById("informacion").className = "alert alert-danger";
+                   document.getElementById('informacion').style.display = 'block';
+                   document.getElementById('informacion').innerHTML = "No cumple con los pre-requisitos para realizar su solicitud"
+                   $('#myModal').modal('hide');
+               }
+               
+           }
+        });
+    }
+</script>
+    {% endblock %}

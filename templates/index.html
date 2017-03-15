@@ -10,6 +10,9 @@
         <h4>Citas</h4>
         <h4>Inscripciones</h4>
         <a href="{% url 'inscripcion:inscripcion_nuevo' %}"><input value="Nueva Inscripcion" class="btn btn-success" type="button"></a>
+        <h4>Citas</h4>
+        <a href="{% url 'inscripcion:nueva_citacion' %}"><input value="Nueva Citacion" class="btn btn-success" type="button"></a>
+        <a href="{% url 'inscripcion:listar_citas' %}"><input value="Listar citas" class="btn btn-success" type="button"></a>
         <h4>Usuarios</h4>
         <a href="{% url 'usuario:registro_usuarios' %}"><input value="Crear Usuarios" class="btn btn-success" type="button"></a>
         {% endif %}

@@ -41,7 +41,7 @@ class Idioma(models.Model):
 #Nivel (A.1.1-A.1.2-B.1.1-B.1.2)
 class Nivel(models.Model):
     nombre = models.CharField(max_length=15)
-    pre_requisito = models.ManyToManyField("self", blank=True)
+    pre_requisito = models.ForeignKey("self",null=True, blank=True)
     
     def __str__(self):
         return '{}'.format(self.nombre)

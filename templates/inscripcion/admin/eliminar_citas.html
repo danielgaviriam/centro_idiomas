@@ -1,0 +1,11 @@
+{% extends '../templates/base/base.html' %}
+    
+    
+    {% block content %}
+        <form method='POST'>
+    {% csrf_token %}
+    <h3>¿Desea eliminar el registro de {{cita.id}}</h3>
+    <button class="btn btn-danger" type='submit'>Si, eliminar</button>
+    <a class="btn btn-default" href="{% url 'inscripcion:listar_citas'%}">Cancelar</a>
+</form>
+    {% endblock %}

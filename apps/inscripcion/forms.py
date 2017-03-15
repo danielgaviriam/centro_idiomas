@@ -50,7 +50,7 @@ class PersonaForm(forms.ModelForm):
             'nombres':forms.TextInput(attrs={'class':'form-control'}),
             'apellidos':forms.TextInput(attrs={'class':'form-control'}),
             'ciudad':forms.TextInput(attrs={'class':'form-control'}),
-            'tel_contacto':forms.TextInput(attrs={'class':'form-control','type':'number'}),    
+            'tel_contacto':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             'email':forms.TextInput(attrs={'class':'form-control','type':'email'}),
             'edad':forms.TextInput(attrs={'class':'form-control','type':'number'}),    
             'discapacidad':forms.Select(attrs={'class':'form-control'}),

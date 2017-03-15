@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from ..registro_academico.models import Identificacion, Discapacidad, Idioma, Ciclo #,Citacion
+from ..registro_academico.models import Identificacion, Discapacidad, Idioma, Ciclo, Nivel,Curso #,Citacion
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator
 
@@ -40,6 +40,16 @@ class Inscripcion(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.idioma, self.persona.nombres)
+        
+class Solicitud_Continuacione(models.Model):
+    persona = models.ForeignKey(Persona,null=True,blank=True)
+    pre_curso = models.ForeignKey(Curso,null=True,blank=True)
+    idioma = models.ForeignKey(Idioma,null=True,blank=True)
+    nivel = models.ForeignKey(Nivel,null=True,blank=True)
+    confirmacion = models.BooleanField()
+
+    def __str__(self):
+        return '{} {} {}'.format(self.persona.nombre, self.persona.curso, self.curso.nivel)
         
 """
 class preinscripcion_examen(models.Model):

@@ -9,13 +9,15 @@ from models import *
 from ..registro_academico.models import Citacion, Idioma, Sede, Matricula, Nivel
 from centro_idiomas.roles import *    
 from rolepermissions.shortcuts import assign_role, get_user_role
+import psycopg2, psycopg2.extras
+import traceback
 
 
 
 # Create your views here.
 def nueva_inscripcion(request):
     #Validacion, para que el usuario que este registrado no pueda ingresar al formulario de inscripcion
-    if not request.user.is_anonymous():
+    if request.user.is_anonymous():
         #Redireccion a Raiz
         return HttpResponseRedirect('/index')
     if request.method == 'POST':
@@ -95,33 +97,121 @@ def nuevo_idioma_inscripcion(request):
     return render(request,'inscripcion/user/solicitud_nuevo_idioma.html',{'form':form})
 
 def interfaz_continudad(request):
-    
+    if request.user.is_anonymous():
+        #Redireccion a Raiz
+        return HttpResponseRedirect('/index')
     #Usuario/Persona logged
     usuario_actual=request.user
     persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
-    #Idiomas en los que se encuentra matriculado
-    lista_idiomas=[]
-    lista_estudiante_niveles_notas=[]
     
-    matriculas = Matricula.objects.filter(persona_id=persona_logged.id)
-    for matricula in matriculas:    
-        lista_idiomas.append(matricula.curso.idioma.id)
+    
+    try:
+        connection = psycopg2.connect(database='centro_idiomas_bd',user='postgres',password='postgres', host='localhost')
+        cursor = connection.cursor()
+        cursor.execute("select mat.persona_id, c.idioma_id,c.nivel_id, MAX(mat.nota) from (select id, idioma_id,nivel_id from registro_academico_curso) as c JOIN registro_academico_matricula as mat ON c.id = mat.curso_id where persona_id= " + str(persona_logged.id) + "group by persona_id, idioma_id, nivel_id;")
+        datos_curso = cursor.fetchall()
         
-        obj = {
-            'idioma':matricula.curso.idioma,
-            'nivel':matricula.curso.nivel,
-            'nota':matricula.nota,
-        }
-        lista_estudiante_niveles_notas.append(obj)
+        niveles = Nivel.objects.all().values_list('id',flat=True)
+        lista_idiomas = []
         
-    idiomas = Idioma.objects.filter(pk__in=lista_idiomas)
+        for datos in datos_curso:
+            if not datos[1] in lista_idiomas:
+                lista_idiomas.append(datos[1])
+        #Buscar como hacerlo mas facil!! NOTAAA!!                
+        idiomas_vistos = Idioma.objects.filter(pk__in=lista_idiomas)
+        informacion = []
+        for idioma in idiomas_vistos:
+            niveles_vistos=[]
+            nivel_nota = []
+            for nivel in niveles:
+                for dato in datos_curso:
+                    if dato[2] == nivel and dato[1] == idioma.id and dato[3] >= 3:
+                        niveles_vistos.append(dato[2])
+                        nivel_a_asignar = Nivel.objects.get(pk=dato[2])
+                        obj={
+                            'nivel':nivel_a_asignar.nombre,
+                            'nota':dato[3],
+                            'disponible':False
+                        }
+                        nivel_nota.append(obj)
+            
+            for nivel in niveles:
+                if not nivel in niveles_vistos:
+                    nivel_a_asignar = Nivel.objects.get(pk=nivel)
+                    if nivel_a_asignar.pre_requisito_id in niveles_vistos:
+                        obj={
+                                'nivel':nivel_a_asignar.nombre,
+                                'nota':-1,
+                                'disponible':True
+                            }
+                        nivel_nota.append(obj)
+                    else:
+                        obj={
+                                'nivel':nivel_a_asignar.nombre,
+                                'nota':-1,
+                                'disponible':False
+                            }
+                        nivel_nota.append(obj)
+            
+            obj2={
+                'idioma':idioma.nombre,
+                'niveles':nivel_nota,
+            }
+            informacion.append(obj2)
+            
+            
+        return render(request,'inscripcion/user/interfaz_continuidad.html',{'informacion':informacion})
+    except:
+        print "fallo"
+        traceback.print_exc()
+        return render(request,'inscripcion/user/interfaz_continuidad.html')
     
-    niveles = Nivel.objects.all()
-    contexto = {'idiomas':idiomas,'niveles':niveles,'lista_estudiante':lista_estudiante_niveles_notas}
+
+def formulario_de_continuacion(request):
     
-    return render(request,'inscripcion/user/interfaz_continuidad.html',contexto)
+    #Usuario/Persona logged
+    if request.user.is_anonymous():
+        #Redireccion a Raiz
+        return HttpResponseRedirect('/index')
+    usuario_actual=request.user
+    persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
     
-    
+    #Variables de AJAX
+    variable_a = request.GET.get('identificador_idioma')
+    id_idioma = Idioma.objects.get(nombre=variable_a)
+    variable_b = request.GET.get('identificador_nivel')
+    id_nivel = Nivel.objects.get(nombre=variable_b)
+    try:
+        existe = Solicitud_Continuacione.objects.filter(idioma=id_idioma,nivel=id_nivel).count()
+        if existe != 0:
+            return HttpResponse(-1)
+            
+        connection = psycopg2.connect(database='centro_idiomas_bd',user='postgres',password='postgres', host='localhost')
+        cursor = connection.cursor()
+        cursor.execute("select c.id, MAX(mat.nota) from (select curso_id, nota from registro_academico_matricula where persona_id = " + str(persona_logged.id) + ") as mat JOIN registro_academico_curso as c ON c.id = mat.curso_id where idioma_id=" + str(id_idioma.id) + " AND nivel_id= "+ str(id_nivel.pre_requisito_id) +" GROUP BY c.id;")
+        datos_curso = cursor.fetchall()
+        
+        for datos in datos_curso:
+            id_curso = datos[0]
+            nota = datos[1]
+        
+        print("holaaaaaaa")
+        print(str(nota))
+        
+        curso = Curso.objects.get(pk=id_curso)
+        if nota >= 3:
+            
+            solicitud = Solicitud_Continuacione(persona_id=persona_logged.id,pre_curso_id=curso.id,confirmacion=False,idioma=id_idioma,nivel=id_nivel)
+            solicitud.save()
+            return HttpResponse(1)    
+        else:
+            return HttpResponse(0)
+        
+    except:
+        traceback.print_exc()
+        return HttpResponse(0)
+        
+
 """
 def listar_citas(request):
     
@@ -214,7 +304,7 @@ def enviar_citas(request):
                 fail_silently=False,
                 )
     except:
-        print "fallo"
+        
         traceback.print_exc()
 
     return render(request, 'index.html')
