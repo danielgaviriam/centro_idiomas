@@ -23,7 +23,7 @@ def nueva_citacion(request):
             form = CitacionForm()        
     else:
         form = CitacionForm()
-    return render(request,'inscripcion/user/inscripcion_form.html',{'form':form})
+    return render(request,'inscripcion/admin/citacion_form.html',{'form':form})
     
 #Listar Basado en Clases
 class Listar_citas(ListView):
