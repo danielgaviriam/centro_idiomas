@@ -195,9 +195,6 @@ def formulario_de_continuacion(request):
             id_curso = datos[0]
             nota = datos[1]
         
-        print("holaaaaaaa")
-        print(str(nota))
-        
         curso = Curso.objects.get(pk=id_curso)
         if nota >= 3:
             

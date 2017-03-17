@@ -15,7 +15,7 @@ urlpatterns = [
     url(r'^listar_citas/',Listar_citas.as_view(), name='listar_citas'),
     url(r'^editar_cita/(?P<id_cita>\d+)/$',editar_cita, name='editar_cita'),
     url(r'^eliminar/(?P<id_cita>\d+)/$',eliminar_cita, name='eliminar_cita'), 
-    url(r'^agendar_citas/$',agendar_citas, name='agendar_citas'), 
+    url(r'^agendar_citas/',agendar_citas, name='agendar_citas'), 
     
     
 ]

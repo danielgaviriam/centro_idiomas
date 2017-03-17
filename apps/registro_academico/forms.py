@@ -69,5 +69,6 @@ class CitacionForm(forms.ModelForm):
             'idioma':forms.Select(attrs={'class':'form-control'}),
             'edad':forms.Select(attrs={'class':'form-control'}),
             'salon':forms.TextInput(attrs={'class':'form-control'}),
+            'numero_estudiantes':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             }
             
