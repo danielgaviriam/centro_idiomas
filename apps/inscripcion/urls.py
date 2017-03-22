@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.conf.urls import url
 from django.contrib import admin
-from ..registro_academico.views import nueva_citacion, Listar_citas, editar_cita, eliminar_cita, agendar_citas
+from ..registro_academico.views import nueva_citacion, Listar_citas, editar_cita, eliminar_cita, agendar_citas,enviar_citas,nueva_citacion_ajax
 
 from views import *
 
@@ -15,19 +15,10 @@ urlpatterns = [
     url(r'^listar_citas/',Listar_citas.as_view(), name='listar_citas'),
     url(r'^editar_cita/(?P<id_cita>\d+)/$',editar_cita, name='editar_cita'),
     url(r'^eliminar/(?P<id_cita>\d+)/$',eliminar_cita, name='eliminar_cita'), 
-    url(r'^agendar_citas/',agendar_citas, name='agendar_citas'), 
-    
+    url(r'^agendar_citas/',agendar_citas, name='agendar_citas'),
+    url(r'^enviar_citas/',enviar_citas, name='enviar_citas'),    
+
+    #Ajax :)
+    url(r'^cita_ajax/',nueva_citacion_ajax, name='nueva_citacion_ajax'),
     
 ]
-
-#Modulo de Administrador
-"""
-url(r'^listar_citas/',listar_citas, name='listar_citas'),
-url(r'^confirmar_citas/',confirmacion_citas, name='confirmar_citas'),
-url(r'^enviar_citas/',enviar_citas, name='enviar_citas'),
-"""
-#Ajax y Javascript
-"""
-url(r'^agregar_cita/',agregar_cita, name='agregar_cita'),
-url(r'^cancelar_cita/',cancelar_cita, name='cancelar_cita'),
-"""

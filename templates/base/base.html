@@ -1,9 +1,9 @@
 {% load staticfiles %}
+{% load permission_tags %}
 <!DOCTYPE html>
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <!--<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">-->
         <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
         <!--Cargar el plugin de Datatables-->
@@ -23,47 +23,41 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-        <li><a href="/index/">Inicio</a></li>
+        <li><a href="{% url 'index' %}">Inicio</a></li>
         <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Inscripcion <span class="caret"></span></a>
           <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
+            {% if not user.is_authenticated %}
+            <li><a href="{% url 'inscripcion:inscripcion_nuevo' %}">Nueva Inscripcion</a></li>
+            {% endif %}
+            {% if user|has_role:'estudiante' %}
+            <li><a href="{% url 'inscripcion:interfaz_continudad' %}">Formulario de Continuidad</a></li>
+            <li><a href="{% url 'inscripcion:inscripcion_nuevo_idioma' %}">Solicitud de nuevo Idioma</a></li>
+            {% endif %}
+            {% if user|has_role:'administrador' %}
+            <li><a href="{% url 'inscripcion:inscripcion_nuevo' %}">Nueva Inscripcion</a></li>
+            <li><a href="{% url 'inscripcion:agendar_citas' %}">Gestion de Examenes</a></li>
+            {% endif %}
           </ul>
         </li>
+        {% if user|has_role:'administrador' %}
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Usuarios<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="/usuarios/registro_usuario/">Crear Usuarios</a></li>
+          </ul>
+        </li>
+        {% endif %}
       </ul>
-      <!--
-      <form class="navbar-form navbar-left">
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder="Search">
-        </div>
-      </form>-->
       <ul class="nav navbar-nav navbar-right">
         <!--<li><button type="button" class="btn btn-default navbar-btn">Iniciar Sesion</button></li>-->
         {% block sesion %}
         {% if user.is_authenticated %}
-        <li><a href="{% url 'usuario:cerrar_sesion'  %}"><button type="button" class="btn btn-default navbar-btn" />Cerrar Sesion</button></a></li>
+        <li><a href="{% url 'usuario:cerrar_sesion'  %}">Cerrar Sesion</a></li>
         {% else %}
-        <li><a href="{% url 'login' %}"><button type="button" class="btn btn-default navbar-btn">Iniciar Sesion</button></li></a>
+        <li><a href="{% url 'login' %}">Iniciar Sesion</li></a>
         {% endif %}
         {% endblock %}
-        <!--
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-          </ul>
-        </li>-->
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

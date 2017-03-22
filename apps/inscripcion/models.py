@@ -3,14 +3,15 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from ..registro_academico.models import Identificacion, Discapacidad, Idioma, Ciclo, Nivel,Curso #,Citacion
+from ..registro_academico.models import *
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator
+from ..registro_academico.models import *
 
 # Create your models here.
 class Persona(models.Model):
     tipo_identificacion = models.ForeignKey(Identificacion,null=True,blank=True)
-    num_identificacion = models.IntegerField()
+    num_identificacion = models.BigIntegerField()
     nombres = models.CharField(max_length=50)
     apellidos = models.CharField(max_length=50)
     ciudad = models.CharField(max_length=50)
@@ -40,6 +41,7 @@ class Inscripcion(models.Model):
 
     def __str__(self):
         return '{} {}'.format(self.idioma, self.persona.nombres)
+
         
 class Solicitud_Continuacione(models.Model):
     persona = models.ForeignKey(Persona,null=True,blank=True)
@@ -49,17 +51,13 @@ class Solicitud_Continuacione(models.Model):
     confirmacion = models.BooleanField()
 
     def __str__(self):
-        return '{} {} {}'.format(self.persona.nombre, self.persona.curso, self.curso.nivel)
-        
-"""
-class preinscripcion_examen(models.Model):
+        return '{} {} {}'.format(self.persona.nombres, self.pre_curso.nombre, self.pre_curso.nivel)
+
+class Inscripcion_Examen(models.Model):
     nota = models.IntegerField(null=True)
-    usuario_preinscrito = models.ForeignKey(pre_inscripcion,null=True,blank=True)
+    inscripcion = models.ForeignKey(Inscripcion,null=True,blank=True)
     citacion = models.ForeignKey(Citacion,null=True,blank=True)
     citacion_enviada = models.BooleanField()
     
     def __str__(self):
-        return '{}'.format(self.usuario_preinscrito.num_identificacion)
-    
-    def __unicode__(self):
-        return self.nota or u''"""
+        return '{}'.format(self.inscripcion)

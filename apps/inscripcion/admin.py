@@ -6,3 +6,4 @@ from models import *
 admin.site.register(Inscripcion)
 admin.site.register(Persona)
 admin.site.register(Solicitud_Continuacione)
+admin.site.register(Inscripcion_Examen)

@@ -12,13 +12,11 @@ from rolepermissions.shortcuts import assign_role, get_user_role
 import psycopg2, psycopg2.extras
 import traceback
 
-
-
 # Create your views here.
 def nueva_inscripcion(request):
     #Validacion, para que el usuario que este registrado no pueda ingresar al formulario de inscripcion
-    if request.user.is_anonymous():
-        #Redireccion a Raiz
+    role = get_user_role(request.user)
+    if role == Estudiante:
         return HttpResponseRedirect('/index')
     if request.method == 'POST':
         #recibir los datos

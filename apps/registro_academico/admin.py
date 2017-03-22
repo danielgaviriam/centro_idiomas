@@ -14,4 +14,3 @@ admin.site.register(Curso)
 admin.site.register(Edad)
 admin.site.register(Citacion)
 admin.site.register(Matricula)
-

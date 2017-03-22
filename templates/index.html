@@ -4,27 +4,5 @@
     {% block title %} Index Principal {% endblock %}
     
     {% block content %}
-        {% if user|has_role:'administrador' %}
-        <h3>Usted ha ingresado al sistema como {{user.username}}</h3>
-        <h3>Usted tiene permisos de usuario administrador</h3>
-        <h4>Citas</h4>
-        <h4>Inscripciones</h4>
-        <a href="{% url 'inscripcion:inscripcion_nuevo' %}"><input value="Nueva Inscripcion" class="btn btn-success" type="button"></a>
-        <h4>Citas</h4>
-        <a href="{% url 'inscripcion:nueva_citacion' %}"><input value="Nueva Citacion" class="btn btn-success" type="button"></a>
-        <a href="{% url 'inscripcion:listar_citas' %}"><input value="Listar citas" class="btn btn-success" type="button"></a>
-        <h4>Usuarios</h4>
-        <a href="{% url 'usuario:registro_usuarios' %}"><input value="Crear Usuarios" class="btn btn-success" type="button"></a>
-        {% endif %}
-        {% if user|has_role:'estudiante' %}
-        <h3>Usted ha ingresado al sistema como {{user.username}}</h3>
-        <h3>Usted tiene permisos de usuario estudiante</h3>
-        <h4>Inscripciones (Alumno antiguos)</h4>
-        <h3>Este es el formulario para estudiantes antiguos</h3>
-        <a href="{% url 'inscripcion:inscripcion_nuevo_idioma' %}"><input value="Inscripcion a un nuevo Idioma" class="btn btn-success" type="button"></a>
-        <a href="{% url 'inscripcion:interfaz_continudad' %}"><input value="Solicitud de Continuidad" class="btn btn-success" type="button"></a>
-        {% else %}
-        <h4>Inscripciones (Alumno Nuevo)</h4>
-        <a href="{% url 'inscripcion:inscripcion_nuevo' %}"><input value="Nueva Inscripcion" class="btn btn-success" type="button"></a>
-        {% endif %}
+    <center><h1>Bienvenido<br>Centro de Lenguajes y Cultura de la facultad de Idiomas de la Universidad del Valle<br></h1></center>
     {% endblock %}

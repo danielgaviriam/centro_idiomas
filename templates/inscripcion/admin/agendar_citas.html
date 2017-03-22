@@ -1,6 +1,6 @@
 {% extends '../templates/base/base.html' %}
 
-{% block title %}Registro Solicitud{% endblock %}
+{% block title %}Agendamiento de Citas{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-xs-12 col-sm-offset-0">
@@ -44,7 +44,7 @@
                 </div>
                 <h2>Niños</h2>
                 <div class="list-group">
-                    {% if citaciones_disponibles_ninos %}
+                    {% if citaciones_disponibles_ninos or citaciones_no_disponibles_ninos %}
                         {% for citas in citaciones_disponibles_ninos %}
                             <a href="#" class="list-group-item list-group-item-success">{{citas.persona.nombres}}</a>
                         {% endfor %}
@@ -57,6 +57,13 @@
                 </div>
             </div>
             <div class="col-sm-8" style="background-color:lightcyan;">  
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>    
+                    {% endfor %}
+                {% endif %}
                 <table id="tabla" class="table table-striped table-bordered" cellspacing="0" width="100%">
                     <thead>
                         <tr>
@@ -66,6 +73,7 @@
                             <th class="text-center">Ubicacion</th>
                             <th class="text-center"># Estudiantes</th>
                             <th class="text-center">Actions</th>                                   
+                            <th class="text-center">Cupos</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,11 +91,14 @@
                                     <input type="hidden" id="identificador" name="{{citacion.idioma}}" style="visibility:hidden" value={{citacion.idioma}}>
                                 </td>
                                 </form>
+                                <td align="center"><strong>{{ citacion.cupos }}</strong></td> 
                             </tr>
                         {% endfor %}
                     </tbody>    
                 </table>
-                <a href="/inscripcion/enviar_citas/?tap=Ingles" class="btn btn-success pull-right" style="align:rigth">Enviar citas</a>
+                <a href="/inscripcion/nueva_cita/" class="btn btn-primary pull-left">Agregar Cita</a>
+                <!--<a onclick="formulario_citacion()" class="btn btn-primary pull-left">Agregar Cita JS</a>-->
+                <a href="/inscripcion/enviar_citas/?tap={{tap}}" class="btn btn-success pull-right" >Enviar citas</a>
             </div>
         </div>
     </div>
@@ -95,4 +106,21 @@
 
 {% block scripts %}
     
-{% endblock %}
+        <script type="text/javascript">
+        
+        function formulario_citacion(){
+        var url = "/inscripcion/cita_ajax/";
+        
+        $.ajax({
+           url: url,
+           type: 'GET',
+           success: function(response_data)
+           {
+               
+               $('#tabla').append('<tr><td>'.concat(response_data.content).concat('</td></tr>'));
+           }
+        });
+    }
+    
+    </script>
+    {% endblock %}

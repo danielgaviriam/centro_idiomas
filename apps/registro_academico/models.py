@@ -87,6 +87,20 @@ class Discapacidad(models.Model):
     def __unicode__(self):
         return self.tipo
         
+class Citacion(models.Model):
+    fecha_examen = models.DateField(blank=True)
+    sede = models.ForeignKey(Sede,null=True,blank=True)
+    idioma = models.ForeignKey(Idioma,null=True,blank=True)
+    edad = models.ForeignKey(Edad,null=True,blank=True)
+    salon = models.CharField(max_length=50)
+    numero_estudiantes = models.IntegerField()
+    
+    def __str__(self):
+        return '{} {} {} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad)
+        
+    def __unicode__(self):
+        return self.salon
+
 class Curso(models.Model):
     nombre = models.CharField(max_length=50,null=True)
     ciclo = models.ForeignKey(Ciclo,null=True,blank=True)
@@ -114,17 +128,5 @@ class Matricula(models.Model):
     def __str__(self):
         return '{} {}'.format(self.curso, self.persona)
 
-class Citacion(models.Model):
-    fecha_examen = models.DateField(blank=True)
-    sede = models.ForeignKey(Sede,null=True,blank=True)
-    idioma = models.ForeignKey(Idioma,null=True,blank=True)
-    edad = models.ForeignKey(Edad,null=True,blank=True)
-    salon = models.CharField(max_length=50)
-    numero_estudiantes = models.IntegerField()
-    
-    def __str__(self):
-        return '{} {} {} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad)
-        
-    def __unicode__(self):
-        return self.salon
+
     
