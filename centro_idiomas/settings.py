@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'apps.inscripcion',
     'apps.usuario',
     'rolepermissions',
+    #dataables
+    'table',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -136,6 +138,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = '/static/'
 
 #Busqueda de archivos, Css,Js,Img,etc en folder Static
 STATICFILES_DIRS = (

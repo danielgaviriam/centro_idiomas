@@ -92,9 +92,9 @@ def inicio_sesion(request):
 def cerrar_sesion(request):
     if not request.user.is_anonymous():
         logout(request)
-        return HttpResponseRedirect('/')    
+        return HttpResponseRedirect('/index/')    
     else:
-        return HttpResponseRedirect('/')
+        return HttpResponseRedirect('/index/')
 
 def index(request):
     return render(request, 'index.html')

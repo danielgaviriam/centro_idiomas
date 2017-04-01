@@ -1,6 +1,6 @@
 {% extends '../templates/base/base.html' %}
 
-{% block title %}Agendamiento de Citas{% endblock %}
+{% block title %}Agendamiento de Examenes{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-xs-12 col-sm-offset-0">
@@ -29,7 +29,8 @@
             </ul>
             <br>
             <div class="col-sm-3" style="background-color:lightcyan;">
-                <h2>Adultos</h2>
+                <center><h3><strong>Solicitudes Pendientes</strong></h3></center>
+                <h4>Adultos</h4>
                 <div class="list-group">
                     {% if citaciones_disponibles_adultos %}
                         {% for citas in citaciones_disponibles_adultos %}
@@ -42,7 +43,7 @@
                         <a href="#" class="list-group-item">No hay solicitudes</a>
                     {% endif %}
                 </div>
-                <h2>Niños</h2>
+                <h4>Niños</h4>
                 <div class="list-group">
                     {% if citaciones_disponibles_ninos or citaciones_no_disponibles_ninos %}
                         {% for citas in citaciones_disponibles_ninos %}
@@ -71,9 +72,9 @@
                             <th class="text-center" >Tipo</th>
                             <th class="text-center">Sede</th>
                             <th class="text-center">Ubicacion</th>
-                            <th class="text-center"># Estudiantes</th>
+                            <th class="text-center" style="width:10%;">Cupos</th>
                             <th class="text-center">Actions</th>                                   
-                            <th class="text-center">Cupos</th>
+                            <th class="text-center">Cupos Disponibles</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -87,8 +88,8 @@
                                 <td>{{ citacion.form.numero_estudiantes }}</td> 
                                 <td>
                                     <button class="btn btn-primary"type='submit'>Guardar</button>
-                                    <input type="hidden" id="identificador" name="{{citacion.id}}" style="visibility:hidden" value={{citacion.id}}>
-                                    <input type="hidden" id="identificador" name="{{citacion.idioma}}" style="visibility:hidden" value={{citacion.idioma}}>
+                                    <input type="hidden" name="{{citacion.id}}" style="visibility:hidden" value={{citacion.id}}>
+                                    <input type="hidden" name="{{citacion.idioma}}" style="visibility:hidden" value={{citacion.idioma}}>
                                 </td>
                                 </form>
                                 <td align="center"><strong>{{ citacion.cupos }}</strong></td> 
@@ -96,9 +97,8 @@
                         {% endfor %}
                     </tbody>    
                 </table>
-                <a href="/inscripcion/nueva_cita/" class="btn btn-primary pull-left">Agregar Cita</a>
-                <!--<a onclick="formulario_citacion()" class="btn btn-primary pull-left">Agregar Cita JS</a>-->
-                <a href="/inscripcion/enviar_citas/?tap={{tap}}" class="btn btn-success pull-right" >Enviar citas</a>
+                <a href="/inscripcion/nueva_cita/" class="btn btn-primary pull-left">Agregar Examen</a>
+                <a href="/inscripcion/listar_citas/?tap={{tap}}" class="btn btn-success pull-right" >Agendar citas</a>
             </div>
         </div>
     </div>

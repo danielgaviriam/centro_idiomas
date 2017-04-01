@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# encoding: UTF-8
 from django.shortcuts import render, redirect
 from models import *
 from forms import *
@@ -8,6 +9,8 @@ import traceback
 from django.contrib import messages
 from centro_idiomas.roles import *    
 from rolepermissions.shortcuts import assign_role, get_user_role
+from ..inscripcion.forms import ExamenForm
+
 
 # Create your views here.
 # Create your views here.
@@ -37,12 +40,6 @@ def nueva_citacion_ajax(request):
     return HttpResponse(form)
     
     
-#Listar Basado en Clases
-class Listar_citas(ListView):
-    model = Citacion
-    template_name = 'inscripcion/admin/listar_citas.html'
-    
-
 def editar_cita(request, id_cita):
     cita = Citacion.objects.get(id=id_cita)
     if request.method == 'GET':
@@ -433,13 +430,24 @@ def agendar_citas(request):
         return render(request,'inscripcion/admin/agendar_citas.html',contexto)
 
 
-from django.core.mail import send_mail
 
-def enviar_citas(request):
+from ..inscripcion.tables import CitacionTable
+import json
+from django.core import serializers
+
+def listar_citas(request):
+    contexto={
+        
+    }
     
-    idioma = request.GET.get('tap')
-    idioma = Idioma.objects.get(nombre=idioma)
+    idioma1 = request.GET.get('tap')
+    
+    if idioma1 == None:
+        idioma1="Ingles"
+        
+    idioma = Idioma.objects.get(nombre=idioma1)
     citaciones = Citacion.objects.filter(idioma_id=idioma.id)
+    json_citaciones = serializers.serialize('json', citaciones)
     
     for citacion in citaciones:
         preinscripciones = Inscripcion.objects.filter(idioma_id=idioma.id,cita_examen_creada=False,sol_examen=True)
@@ -461,11 +469,40 @@ def enviar_citas(request):
                 solicitud = Inscripcion_Examen(inscripcion=inscripcion, citacion = citacion, citacion_enviada=False, nota=-1)
                 solicitud.save()
                 iterator+=1
+        
+        
+    lista =[]
+    registros = Inscripcion_Examen.objects.filter(inscripcion__cita_examen_creada=True,inscripcion__idioma=idioma)
+    for registro in registros:
+        form = ExamenForm(instance = registro)
+        obj={
+            
+            'registro':registro,
+            'form':form
+        }
+        lista.append(obj)
+    
+    contexto['citaciones']=citaciones
+    contexto['citas']=lista
+    tabla = CitacionTable()
+    contexto['tabla']= tabla
+    contexto['idioma']=idioma.nombre
+    contexto['json_citaciones']=json_citaciones
+    
+    return render(request,'inscripcion/admin/listar_citas.html',contexto)
+
+from django.core.mail import send_mail
+
+def enviar_citas(request):
+    
+    idioma = request.GET.get('tap')
+    idioma = Idioma.objects.get(nombre=idioma)
+    
                 
-    registros = Inscripcion_Examen.objects.filter(inscripcion__cita_examen_creada=True,citacion_enviada=False)
+    registros = Inscripcion_Examen.objects.filter(inscripcion__cita_examen_creada=True,citacion_enviada=False,inscripcion__idioma=idioma)
     
     for registro in registros:
-        mensaje = "Señor "+ str(registro.inscripcion.persona.nombres) + " " + str(registro.inscripcion.persona.apellidos) + " El Examen de Clasificacion para el Idioma " + str(registro.inscripcion.idioma.nombre) + ", quedo para  " + str(registro.citacion.fecha_examen) + ", en la sede " + str(registro.citacion.sede.nombre) + " en " + "ubicacion" + str(registro.citacion.salon)
+        mensaje = "Señor "+ str(registro.inscripcion.persona.nombres) + " " + str(registro.inscripcion.persona.apellidos) + " El Examen de Clasificacion para el Idioma " + str(registro.inscripcion.idioma.nombre) + ", quedo para  " + str(registro.citacion.fecha_examen) + ", en la sede " + str(registro.citacion.sede.nombre) + " en " + "ubicacion" + str(registro.citacion.salon) 
         send_mail(
             'Prueba Django',
             mensaje,
@@ -473,14 +510,20 @@ def enviar_citas(request):
             [registro.inscripcion.persona.email],
             fail_silently=False,
             )
-        
-    return HttpResponseRedirect('/inscripcion/agendar_citas/?tap='+idioma.nombre)
+        registro.citacion_enviada = True
+        registro.save()
+    #Pendiente esta redirección    
+    return redirect('inscripcion:agendar_citas')
     
     
-
+def examen_disponible(id_idioma):
+    examenes = Citacion.objects.filter(idioma=id_idioma)
+    
+    val = ""
+    for examen in examenes:
+        cupos = cupos_disponbiles(examen.id)
+        if cupos > 0:
+            val = examen
+            return val
             
-    
-
-
-    
-    
+    return val

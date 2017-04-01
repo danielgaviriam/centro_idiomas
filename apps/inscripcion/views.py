@@ -7,10 +7,12 @@ from django.http import HttpResponse, HttpResponseRedirect
 from forms import *
 from models import *
 from ..registro_academico.models import Citacion, Idioma, Sede, Matricula, Nivel
+from ..registro_academico.views import cupos_disponbiles
 from centro_idiomas.roles import *    
 from rolepermissions.shortcuts import assign_role, get_user_role
 import psycopg2, psycopg2.extras
 import traceback
+import datetime 
 
 # Create your views here.
 def nueva_inscripcion(request):
@@ -23,44 +25,70 @@ def nueva_inscripcion(request):
         form = PersonaForm(request.POST)
         form2 = InscripcionForm(request.POST)
         if (form.is_valid() and form2.is_valid()):
-            data_persona = form.cleaned_data
-            data_inscripcion = form2.cleaned_data
-            
-            
-            existe = Persona.objects.filter(num_identificacion = data_persona['num_identificacion']).count()
-            
-            if(existe != 0):
-                messages.error(request, "Su Identificacion ya se encuentra registrada")
+            try:
+                data_persona = form.cleaned_data
+                data_inscripcion = form2.cleaned_data
+                existe = Persona.objects.filter(num_identificacion = data_persona['num_identificacion']).count()
+                
+                if(existe != 0):
+                    messages.error(request, "Su Identificacion ya se encuentra registrada")
+                    form = PersonaForm()
+                    form2 = InscripcionForm()
+                    
+                elif(data_persona['email'] == data_persona['email_acudiente']):
+                    messages.error(request, "El email de contacto debe ser diferentes al del usuario")
+                    form = PersonaForm()
+                    form2 = InscripcionForm()  
+                
+                elif(data_persona['num_identificacion'] <= 0 or data_persona['tel_contacto'] <= 0 or data_persona['telefono_acudiente'] <= 0 ):
+                    messages.error(request, "Por favor revise la información diligenciada.")
+                    form = PersonaForm()
+                    form2 = InscripcionForm()
+                
+                elif(data_persona['tel_contacto'] == data_persona['telefono_acudiente']):
+                    messages.error(request, "El número de contacto debe ser diferentes al del usuario")
+                    form = PersonaForm()
+                    form2 = InscripcionForm()
+                    
+                else: 
+                    edad_inscripcion = data_persona['edad']
+                    diferencia = int(((datetime.date.today() - edad_inscripcion).days)/365)
+                    persona = form.save(commit=False)
+                    inscripcion = form2.save(commit=False)
+                    if(diferencia < 17):
+                        persona.mayor_de_edad = False
+                    else:
+                        persona.mayor_de_edad = True
+                        
+                    persona.telefono_acudiente = 0
+                    if request.POST.get('solicitud_examen') == 'Deseo presentar examen':
+                        inscripcion.sol_examen=True
+                    else:
+                        inscripcion.sol_examen=False
+                        
+                    inscripcion.estado_inscripcion=False
+                    inscripcion.cita_examen_creada=False
+                    user = User.objects.create_user(username=persona.num_identificacion,email=persona.email,password=persona.num_identificacion)
+                    persona.usuario = user
+                    
+                    assign_role(user,'estudiante')
+                    form.save()
+                    persona_almacenada = Persona.objects.get(num_identificacion=persona.num_identificacion)
+                    inscripcion.persona = persona_almacenada
+                    inscripcion.save()
+                    
+                    return redirect('index')
+            except:
+                messages.error(request, "Por favor revise la información diligenciada.")
                 form = PersonaForm()
                 form2 = InscripcionForm()
-            else:
-                edad_inscripcion = int(data_persona['edad'])
-                persona = form.save(commit=False)
-                inscripcion = form2.save(commit=False)
-                if(edad_inscripcion < 17):
-                    persona.mayor_de_edad = False
-                else:
-                    persona.mayor_de_edad = True
-                    
-                persona.telefono_acudiente = 0
-                    
-                inscripcion.estado_inscripcion=False
-                inscripcion.cita_examen_creada=False
-                user = User.objects.create_user(username=persona.num_identificacion,
-                                 email=persona.email,
-                                 password=persona.num_identificacion)
-                persona.usuario = user
-                
-                assign_role(user,'estudiante')
-                form.save()
-                persona_almacenada = Persona.objects.get(num_identificacion=persona.num_identificacion)
-                inscripcion.persona = persona_almacenada
-                inscripcion.save()    
-                
-                return redirect('index')
+        else:
+            messages.error(request, "Por favor revise la información diligenciada.")
+            form = PersonaForm()
+            form2 = InscripcionForm()
     else:
-        form = PersonaForm()
-        form2 = InscripcionForm()
+        form = PersonaForm(request.POST)
+        form2 = InscripcionForm(request.POST)
     
     return render(request,'inscripcion/user/inscripcion_form.html',{'form':form, 'form2':form2})
     
@@ -71,25 +99,38 @@ def nuevo_idioma_inscripcion(request):
         return HttpResponseRedirect('/index')
     if request.method == 'POST':
         #recibir los datos
-        form2 = InscripcionForm(request.POST)
-        if form2.is_valid():
+        form = InscripcionForm(request.POST)
+        if form.is_valid():
+            
             usuario_actual=request.user
             persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
             
             
-            data_inscripcion = form2.cleaned_data
-            existe = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma'],ciclo_academico_id=data_inscripcion['ciclo_academico']).count()
+            data_inscripcion = form.cleaned_data
+            existe = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).count()
             if(existe != 0):
                 messages.error(request, "Usted ya ha realizado esta inscripcion")
                 form = InscripcionForm()
             else:    
-                inscripcion = form2.save(commit=False)
+                inscripcion = form.save(commit=False)
+                if request.POST.get('solicitud_examen') == 'Deseo presentar examen':
+                    inscripcion.sol_examen=True
+                elif request.POST.get('solicitud_examen') == 'No deseo presentar examen':
+                    inscripcion.sol_examen=False
+                else:
+                    messages.error(request, "Por favor revise la información diligenciada")
+                    form = InscripcionForm()
+                    return render(request,'inscripcion/user/solicitud_nuevo_idioma.html',{'form':form})
                 inscripcion.estado_inscripcion=False
                 inscripcion.cita_examen_creada=False
                 inscripcion.persona = persona_logged
                 inscripcion.save()    
-                return redirect('index')
+                return redirect('inscripcion:gestion_inscripciones')
+        else:
+            messages.error(request, "Por favor revise la información diligenciada.")
+            form = InscripcionForm(request.POST)
     else:
+        
         form = InscripcionForm()
     
     return render(request,'inscripcion/user/solicitud_nuevo_idioma.html',{'form':form})
@@ -207,102 +248,129 @@ def formulario_de_continuacion(request):
         return HttpResponse(0)
         
 
-"""
-def listar_citas(request):
-    
-    #Validacion de Rol
-    usuario_log = request.user
-    role = get_user_role(usuario_log)
-    if role == Estudiante:
+def gestion_inscripciones(request):
+    #Usuario/Persona logged
+    if request.user.is_anonymous():
+        #Redireccion a Raiz
         return HttpResponseRedirect('/index')
-    #queryset
-    inscripcion = pre_inscripcion.objects.all().order_by('id')
-    citacion = Citacion.objects.all().order_by('id')
-    solicitudes_atendidas = preinscripcion_examen.objects.all().order_by('id')
-    contexto = {'pre_inscripcion':inscripcion,'citacion':citacion,'solicitudes_atendidas':solicitudes_atendidas}
-    return render(request, 'inscripcion/admin/listar_citas.html',contexto)
-    
-def agregar_cita(request):
-    pre_inscrito = request.GET.get('identificador_inscripcion')
-    cita_asignada = request.GET.get('identificador_citacion')
-    #COnsultas a la Base de datos
-    registro_preinscripcion = pre_inscripcion.objects.get(pk = pre_inscrito)
-    registro_preinscripcion.cita_creada=True
-    registro_citacion = Citacion.objects.get(pk = cita_asignada)
-    #Creacion de registro
-    agenda_cita = preinscripcion_examen()
-    agenda_cita.usuario_preinscrito = registro_preinscripcion
-    agenda_cita.citacion = registro_citacion
-    agenda_cita.nota = None
-    agenda_cita.citacion_enviada = False
-    registro_preinscripcion.save()
-    #Almacenamiento de registro
-    agenda_cita.save()
-    
-    return HttpResponse(True)
+    usuario_actual=request.user
+    persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
 
-def cancelar_cita(request):
-    pre_inscrito = request.GET.get('identificador_inscripcion')
-    cita_asignada = request.GET.get('identificador_citacion')
-    #COnsultas a la Base de datos
-    registro_preinscripcion = pre_inscripcion.objects.get(pk = pre_inscrito)
-    registro_citacion = Citacion.objects.get(pk = cita_asignada)
-    #Creacion de registro
-    citacion_eliminar = preinscripcion_examen.objects.filter(usuario_preinscrito=registro_preinscripcion, citacion=registro_citacion)
-    citacion_eliminar.delete()
-    registro_preinscripcion.cita_creada=False
-    registro_preinscripcion.save()
-    return HttpResponse(citacion_eliminar)
-    
-
-def confirmacion_citas(request):
-     #Validacion de Rol
-    usuario_log = request.user
-    role = get_user_role(usuario_log)
-    if role == Estudiante:
-        return HttpResponseRedirect('/index')
-    inscripciones_confirmadas = list(pre_inscripcion.objects.filter(cita_creada = True))
-    citaciones = Citacion.objects.all().order_by('id')
-    contexto = {'pre_inscripcion':inscripciones_confirmadas,'citacion':citaciones}
-    return render(request, 'inscripcion/admin/confirmar_citas.html',contexto)
-    
-
-from django.core.mail import send_mail
-import psycopg2, psycopg2.extras
-import traceback
-
-
-
-def enviar_citas(request):
-    inscripciones_confirmadas = pre_inscripcion.objects.filter(cita_creada = True)
-    try:
-        connection = psycopg2.connect(database='centro_idiomas_bd',user='postgres',password='postgres', host='localhost')
-        cursor = connection.cursor()
-        cursor.execute("select * from registro_academico_citacion JOIN (select * from (select id, email, nombres, apellidos from inscripcion_pre_inscripcion where cita_creada = True) as inscritos JOIN inscripcion_preinscripcion_examen ON inscritos.id = inscripcion_preinscripcion_examen.usuario_preinscrito_id) as usuarios ON registro_academico_citacion.id = usuarios.citacion_id")
-        datos_email = cursor.fetchall()
+    solicitudes = Inscripcion.objects.filter(persona=persona_logged)
+    contexto ={
         
-        for datos in datos_email:
-            idioma = Idioma.objects.get(pk=datos[5])
-            
-            sede = Sede.objects.get(pk=datos[6])
-            
-            registro = preinscripcion_examen.objects.get(pk=datos[11])
-            registro.citacion_enviada = True
-            registro.save()
-            
-            mensaje = "Señor "+ str(datos[9]) + " " + str(datos[10]) + " El Examen de Clasificacion para el Idioma " + str(idioma.nombre) + ", quedo para  " + str(datos[1]) + ", en la sede " + str(sede.nombre) + " en " + "ubicacion" + str(datos[2])
-            send_mail(
-                'Prueba Django',
-                mensaje,
-                'daga9420@gmail.com',
-                [datos[8]],
-                fail_silently=False,
-                )
-    except:
-        
-        traceback.print_exc()
-
-    return render(request, 'index.html')
+    }
+    contexto['solicitudes'] = solicitudes
+    return render(request,'inscripcion/user/gestion_inscripciones.html', contexto)
     
+def editar_inscripcion(request, id_inscripcion):
+    inscripcion = Inscripcion.objects.get(id=id_inscripcion)
+    if request.method == 'GET':
+        form = InscripcionForm(instance=inscripcion)
+    else:
+        form = InscripcionForm(request.POST, instance=inscripcion)
+        if form.is_valid():
+            usuario_actual=request.user
+            persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
+            inscripcion = form.save(commit=False)
+            data_inscripcion = form.cleaned_data
+            
+            if request.POST.get('solicitud_examen') == 'Deseo presentar examen':
+                inscripcion.sol_examen=True
+                solicitud_examen = True
+            else:
+                inscripcion.sol_examen=False
+                solicitud_examen = False
+            
+            existe = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).count()
+            
+            
+            if(existe != 0):
+                inscripcion_antigua = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).update(sol_examen=solicitud_examen)
+                return redirect('inscripcion:gestion_inscripciones')
+                
+            else:
+                inscripcion.save()
+                return redirect('inscripcion:gestion_inscripciones')
+    
+    return render(request, 'inscripcion/user/editar_inscripcion.html', {'form':form})
+    
+def eliminar_inscripcion(request, id_inscripcion):
+    inscripcion = Inscripcion.objects.get(id=id_inscripcion)
+    if request.method =='POST':
+        inscripcion.delete()
+        return redirect('inscripcion:gestion_inscripciones')
+    
+    return render(request, 'inscripcion/user/eliminar_inscripcion.html', {'inscripcion':inscripcion})
+    
+def carga_documentos(request):
+    if request.method == 'POST':
+        usuario_actual=request.user
+        persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
+        form = DocumentosForm(request.POST, request.FILES)
         
-"""
+        if form.is_valid():
+            archivo = request.FILES['file_cedula']
+            documentos = form.save(commit=False)
+            documentos.persona = persona_logged
+            documentos.file_cedula = archivo
+            documentos.save()
+            return HttpResponseRedirect('/index/')
+    else:
+        form = DocumentosForm()
+    return render(request, 'inscripcion/user/documentos_form.html', {'form': form})
+
+
+from io import BytesIO 
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4,cm
+import time
+
+def reporte_examenes(request):
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename=Prueba.pdf' 
+    buffer = BytesIO()
+    c = canvas.Canvas(buffer,pagesize=A4)
+    #ancho
+    c.setLineWidth(.3)
+    #tipo de fuente
+    c.setFont('Helvetica',22)
+    #izquierda-derecha,abajo-arriba
+    c.drawString(30,750,'CLC')
+    #Cambio de Fuente
+    c.setFont('Helvetica-Bold',12)
+    c.drawString(30,735,'Centro de Lenguas y Cultura')
+    #Fecha
+    c.setFont('Helvetica-Bold',12)
+    c.drawString(480,750,time.strftime("%d/%m/%Y"))
+    
+    c.save()
+    pdf = buffer.getvalue()
+    buffer.close()
+    response.write(pdf)
+    return response
+
+
+
+#AJAX
+
+from django.views.decorators.csrf import csrf_exempt
+import json
+#Libreria utilizada para no evaluar el token (Corregir)
+@csrf_exempt
+def guardar_notas_ajax(request):
+    if request.method == 'POST':
+        ids = json.loads(request.POST.get('ids'))
+        notas = json.loads(request.POST.get('notas'))
+        niveles = json.loads(request.POST.get('niveles'))
+        #Validacion de Notas
+        for i in range(0, len(notas)):
+            if float(notas[i]) < 0.0:
+                return HttpResponse(1)
+                
+        for i in range(0, len(ids)):
+            Inscripcion_Examen.objects.filter(pk=ids[i]).update(nota=notas[i],nivel_sugerido=niveles[i])
+        
+        return HttpResponse(0)
+    else:
+        return HttpResponse(1)

@@ -4,5 +4,9 @@
     {% block title %} Index Principal {% endblock %}
     
     {% block content %}
-    <center><h1>Bienvenido<br>Centro de Lenguajes y Cultura de la facultad de Idiomas de la Universidad del Valle<br></h1></center>
+    <center><h1><strong>Bienvenido al CLC</strong><br>Centro de Lenguas y Cultura de la Universidad del Valle</h1></center>
+    {% if not user.is_authenticated %}
+    <center><a href="{% url 'login' %}" ><input  class="btn btn-success" type="button" value="Ingresar"/></a>
+    <a href="{% url 'inscripcion:inscripcion_nuevo' %}" ><input  class="btn btn-primary" type="button" value="Inscribete"/></a></center>
+    {% endif %}
     {% endblock %}

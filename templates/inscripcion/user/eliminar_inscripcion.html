@@ -1,0 +1,11 @@
+{% extends '../templates/base/base.html' %}
+
+{% block title %}Eliminar Inscripcion{% endblock %}
+{% block content %}
+<form method='POST'>
+    {% csrf_token %}
+    <h3>¿Desea eliminar la solicitud de {{inscripcion.idioma}}</h3>
+    <button class="btn btn-danger" type='submit'>Si, eliminar</button>
+    <a class="btn btn-default" href="{% url 'inscripcion:gestion_inscripciones'%}">Cancelar</a>
+</form>
+{% endblock %}

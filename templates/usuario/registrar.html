@@ -11,7 +11,7 @@
         <form method='POST'>
             {% csrf_token %}
             {{formulario.as_p}}
-            <label>Permisos de Usuario</label>
+            <label for="permisos">Permisos de Usuario</label>
             <select class="form-control" name="permisos" id="permisos">
                 {% for rol in roles %}
                 <option value="{{ rol.nombre_usuario }}">{{ rol.nombre_usuario }}</option>

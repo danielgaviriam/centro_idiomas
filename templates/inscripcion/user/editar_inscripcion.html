@@ -1,6 +1,6 @@
 {% extends '../templates/base/base.html' %}
 
-{% block title %}Nueva Solicitud{% endblock %}
+{% block title %}Edicion de Solicitud{% endblock %}
 {% block content %}
 <div class="col-md-6 col-md-offset-3">
         {% if messages %}
@@ -21,16 +21,20 @@
             <div class="form-group">
                 <label for="solicitud_examen">Solicitud de Examen</label>
                 <select class="form-control" name="solicitud_examen" id="solicitud_examen">
-                    <option value="null">----</option>
+                    {% if form.sol_examen.value == True %}
                     <option value="Deseo presentar examen">Deseo presentar examen</option>
                     <option value="No deseo presentar examen">No deseo presentar examen</option>
+                    {% else %}
+                    <option value="No deseo presentar examen">No deseo presentar examen</option>
+                    <option value="Deseo presentar examen">Deseo presentar examen</option>
+                    {% endif %}
                 </select>
                 <small id="emailHelp" class="form-text text-muted">Si usted tiene un conocimiento superior al básico o al de principiante, debe solicitar Examen de clasificación.</small>
             </div>
             
             <button class="btn btn-success" type='submit'>Guardar</button>
             
-            <a href="https://centro-idiomas-daniel-gaviria.c9users.io/index/" class="btn btn-danger" type='submit'>Cancelar</a>
+            <a href="https://centro-idiomas-daniel-gaviria.c9users.io/inscripcion/gestion_inscripciones/" class="btn btn-danger" type='submit'>Cancelar</a>
         </form>
 </div>
 {% endblock %}

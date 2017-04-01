@@ -2,21 +2,103 @@
 {% load permission_tags %}
 {% block title %}Registro Solicitud{% endblock %}
 {% block content %}
+<div class="col-md-6 col-md-offset-3">
         {% if user|has_role:'administrador' %}
         <div class="alert alert-danger">
             Tenga en cuenta que usted esta en una interfaz de usuario estudiante
         </div>
         {% endif %}
+        <h3>
+            <strong>Información y Descripción</strong>
+        </h3>
         {% if messages %}
             {% for message in messages %}
+            <div class="alert alert-danger">
                 {{ message }}
+            </div>
             {% endfor %}
         {% endif %}
-        
         <form method='POST'>
             {% csrf_token %}
-            {{form.as_p}}
-            {{form2.as_p}}
-            <button type='submit'>Guardar</button>
+            <h3>Nueva Solicitud</h3>
+            <div class="form-group">
+                {{form2.idioma.label_tag}}
+                {{form2.idioma}}
+                <small id="emailHelp" class="form-text text-muted">Seleccione el Idioma al cual desea inscribirse</small>
+            </div>
+            <div class="form-group">
+                <label for="solicitud_examen">Solicitud de Examen</label>
+                <select class="form-control" name="solicitud_examen" id="solicitud_examen">
+                    <option value="Deseo presentar examen">Deseo presentar examen</option>
+                    <option value="No deseo presentar examen">No deseo presentar examen</option>
+                </select>
+                <small id="emailHelp" class="form-text text-muted">Si usted tiene un conocimiento superior al básico o al de principiante, debe solicitar Examen de clasificación.</small>
+            </div>
+            <hr size="50">
+            <h3>Información Personal</h3>
+            <div class="form-group">
+                {{form.tipo_identificacion.label_tag}}
+                {{form.tipo_identificacion}}
+                <small id="emailHelp" class="form-text text-muted">Cédula(CC)/Tarjeta de Identidad(TI)/Cedula de Extrangeria(CE)</small>
+            </div>
+            <div class="form-group">
+                {{form.num_identificacion.label_tag}}
+                {{form.num_identificacion}}
+            </div>
+            <div class="form-group">
+                {{form.nombres.label_tag}}
+                {{form.nombres}}
+            </div>
+            <div class="form-group">
+                {{form.apellidos.label_tag}}
+                {{form.apellidos}}
+            </div>
+            <div class="form-group">
+                {{form.ciudad.label_tag}}
+                {{form.ciudad}}
+            </div>
+            <div class="form-group">
+                {{form.tel_contacto.label_tag}}
+                {{form.tel_contacto}}
+            </div>
+            <div class="form-group">
+                {{form.email.label_tag}}
+                {{form.email}}
+                <small id="emailHelp" class="form-text text-muted">Debe ser un email el cual usted pueda revisar de forma permanente.</small>
+            </div>
+            <div class="form-group">
+                {{form.edad.label_tag}}
+                {{form.edad}}
+            </div>
+            <div class="form-group">
+                {{form.genero.label_tag}}
+                {{form.genero}}
+            </div>
+            <div class="form-group">
+                {{form.numero_consignacion.label_tag}}
+                {{form.numero_consignacion}}
+                <small id="emailHelp" class="form-text text-muted">Número de la consignación realizada en el banco correspondiente a la inscripcion.</small>
+            </div>
+            <div class="form-group">
+                {{form.discapacidad.label_tag}}
+                {{form.discapacidad}}
+            </div>
+            <hr size="50">
+            <h3>Información de Acudiente o contacto</h3>
+            <div class="form-group">
+                {{form.nombre_acudiente.label_tag}}
+                {{form.nombre_acudiente}}
+            </div>
+            <div class="form-group">
+                {{form.telefono_acudiente.label_tag}}
+                {{form.telefono_acudiente}}
+            </div>
+            <div class="form-group">
+                {{form.email_acudiente.label_tag}}
+                {{form.email_acudiente}}
+            </div>
+            <center><button class="btn btn-success btn-lg" type='submit'>Guardar</button></center>
+            <br><br>
         </form>
+</div>
 {% endblock %}

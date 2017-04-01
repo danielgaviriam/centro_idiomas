@@ -96,10 +96,10 @@ class Citacion(models.Model):
     numero_estudiantes = models.IntegerField()
     
     def __str__(self):
-        return '{} {} {} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad)
+        return '{} {} {} {} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad, self.salon)
         
     def __unicode__(self):
-        return self.salon
+        return str(self.salon)
 
 class Curso(models.Model):
     nombre = models.CharField(max_length=50,null=True)
@@ -116,6 +116,17 @@ class Curso(models.Model):
     def __unicode__(self):
         return (""+str(self.nombre)+ " "+str(self.nivel)+ " "+str(self.ciclo))
 
+class Genero(models.Model):
+    nombre = models.CharField(max_length=20)    
+    
+    def __str__(self):
+        return '{}'.format(self.nombre)
+        
+    def __unicode__(self):
+        return self.nombre
+
+
+
 from ..inscripcion.models import Persona
 
 class Matricula(models.Model):
@@ -128,5 +139,3 @@ class Matricula(models.Model):
     def __str__(self):
         return '{} {}'.format(self.curso, self.persona)
 
-
-    

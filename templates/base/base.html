@@ -33,6 +33,7 @@
             {% if user|has_role:'estudiante' %}
             <li><a href="{% url 'inscripcion:interfaz_continudad' %}">Formulario de Continuidad</a></li>
             <li><a href="{% url 'inscripcion:inscripcion_nuevo_idioma' %}">Solicitud de nuevo Idioma</a></li>
+            <li><a href="{% url 'inscripcion:gestion_inscripciones' %}">Editar Inscripciones</a></li>
             {% endif %}
             {% if user|has_role:'administrador' %}
             <li><a href="{% url 'inscripcion:inscripcion_nuevo' %}">Nueva Inscripcion</a></li>
@@ -53,14 +54,17 @@
         <!--<li><button type="button" class="btn btn-default navbar-btn">Iniciar Sesion</button></li>-->
         {% block sesion %}
         {% if user.is_authenticated %}
+        <li><a>{{user.username}}</a></li>
         <li><a href="{% url 'usuario:cerrar_sesion'  %}">Cerrar Sesion</a></li>
+        
+        
         {% else %}
         <li><a href="{% url 'login' %}">Iniciar Sesion</li></a>
         {% endif %}
         {% endblock %}
       </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+    </div>
+  </div>
 </nav>
 {% endblock %}    
     
@@ -73,8 +77,8 @@
     </div>
     </body>
     <!--Jquery-->
-    <script type="text/javascript" src="{% static 'jquery/jquery.js' %}"></script>
-    <script type="text/javascript" src="{% static 'jquery/jquery.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery-3.2.0.js' %}"></script>
+    <script type="text/javascript" src="{% static 'jquery/jquery.cookie.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/bootstrap.js' %}"></script>
     <!--Cargar el plugin de Datatables-->
     <script type="text/javascript" src="{% static 'js/jquery.dataTables.min.js' %}"></script>
