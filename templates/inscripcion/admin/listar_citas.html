@@ -4,8 +4,31 @@
     
     {% block content %}
     <div class="col-md-8 col-md-offset-2 ">
-        <center><h3>Citaciones de Examen agendados para {{idioma}}</h3></center>
+        <ul class="nav nav-tabs">
+                {% if tap == "Ingles" %}
+                <li class="active" ><a>Ingles</a></li>
+                {% else %}
+                <li><a href="/inscripcion/listar_citas/?tap=Ingles">Ingles</a></li>
+                {% endif %}
+                {% if tap == "Frances" %}
+                <li class="active"><a>Frances</a></li>
+                {% else %}
+                <li><a href="/inscripcion/listar_citas/?tap=Frances">Frances</a></li>
+                {% endif %}
+                {% if tap == "Italiano" %}
+                <li class="active" ><a>Italiano</a></li>
+                {% else %}
+                <li><a href="/inscripcion/listar_citas/?tap=Italiano">Italiano</a></li>
+                {% endif %}
+                {% if tap == "Portugues" %}
+                <li class="active" ><a>Portugues</a></li>
+                {% else %}
+                <li><a href="/inscripcion/listar_citas/?tap=Portugues">Portugues</a></li>
+                {% endif %}
+            </ul>
+        
         {% if citaciones %}
+        <center><h3>Citaciones de Examen agendados para {{idioma}}</h3></center>
             {% for citacion in citaciones %}
                 <table id="{{citacion.id}}" class="table table-striped table-bordered" cellspacing="0" width="100%">
                     <caption>
@@ -19,14 +42,16 @@
                     <thead>
                         <tr>
                             <th class="text-center">ID</th>
-                            <th class="text-center" style="width:30%"># Documento</th>
-                            <th class="text-center" style="width:30%">Nombre</th>
-                            <th class="text-center" style="width:10%">Nota</th>
-                            <th class="text-center" style="width:15%">Nivel obtenido</th>
+                            <th class="text-center" style="width:20%"># Documento</th>
+                            <th class="text-center" style="width:25%">Nombre</th>
+                            <th class="text-center" style="width:8%">Nota</th>
+                            <th class="text-center" style="width:12%">Nivel obtenido</th>
                             <th class="text-center" style="width:8%">Citación Enviada</th>
+                            <th class="text-center" style="width:27%">Cambiar Examen</th>
                         </tr>
                     </thead>
                     <tbody>
+                        {% if citas %}
                         {% for cita in citas %}
                             {% if cita.registro.citacion.id == citacion.id %}
                             <tr>
@@ -34,14 +59,14 @@
                                 <td>{{ cita.registro.inscripcion.persona.num_identificacion }}</td>
                                 <td>{{ cita.registro.inscripcion.persona.apellidos }} {{ cita.registro.inscripcion.persona.nombres }}</td>
                                 <td>
-                                    {% if cita.registro.citacion_enviada == True %}
+                                    {% if cita.registro.citacion_enviada == True and cita.registro.citacion.fecha_examen <= current_date %}
                                         {{ cita.form.nota }}    
                                     {% else %}
                                         No disponible
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if cita.registro.citacion_enviada == True %}
+                                    {% if cita.registro.citacion_enviada == True and cita.registro.citacion.fecha_examen <= current_date %}
                                         {{ cita.form.nivel_sugerido}}
                                     {% else %}
                                         No disponible
@@ -49,25 +74,43 @@
                                 </td>
                                 <td>
                                     {% if cita.registro.citacion_enviada == True %}
-                                    <center><input type="checkbox" checked disabled></center>
+                                        <center><span class="glyphicon glyphicon-ok"></span></center>
                                     {% else %}
-                                    <center><input type="checkbox" disabled></center>
+                                        <center><span class="glyphicon glyphicon-remove"></span></center>
                                     {% endif %}
                                 </td>
+                                <td>
+                                    {% if cita.registro.citacion.fecha_examen >= current_date %}
+                                        <select class="form-control" name="citas_disponibles" id="citas_disponibles">
+                                            <option value="-">------</option>
+                                            {% for examen in cita.citas_disponibles %}
+                                                <option value="{{ examen.id }}">{{ examen.fecha_examen }} {{ examen.salon }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    {% else %}
+                                        No disponible
+                                    {% endif %}
+                                </td>    
                             </tr>
                             {% endif %}
                         {% endfor %}
+                        {% else %}
+                            No hay registros
+                        {% endif %}
                     </tbody>
                 </table>
-        <a disabled style="margin-left:5px;" href="#" class="btn btn-primary pull-right" onclick="activarEdicion()" >Editar</a>
-        <a style="margin-left:5px;" href="#" class="btn btn-success pull-right" onclick="guardar_notas('{{citacion.id}}')" >Guardar Edicion</a>
+        <a style="margin-left:5px;" href="#" class="btn btn-success pull-right" onclick="guardar_notas('{{citacion.id}}')" >Guardar</a>
         <a style="margin-left:5px;" href="#" class="btn btn-primary pull-left" >Exportar</a><br>
         <hr size="50">
         {% endfor %}
-        <center><a href="/inscripcion/enviar_citas/?tap={{idioma}}" class="btn btn-danger " >Enviar citaciones pendientes</a></center>
+        <center>
+            <a href="/inscripcion/enviar_citas/?tap={{idioma}}" class="btn btn-primary " >Enviar citaciones pendientes</a>
+            <a href="/inscripcion/agendar_citas/?tap={{idioma}}" class="btn btn-default " >Volver</a>
+        </center>
         <br><br>
         {% else %}
             <h3>No existen citas para este {{idioma}}</h3>
+            <a href="/inscripcion/agendar_citas/?tap={{idioma}}" class="btn btn-default " >Volver</a>
         {% endif %}
         
     </div>
@@ -115,7 +158,6 @@ function guardar_notas(id_tabla) {
     //IDs
     var rowsTables1 = $('#'+id_tabla).find('tbody > tr');
     rowsTables1.each(function(){arrayIDs.push($(this).find('td:eq(0)').text())});
-    
     //Notas 
     var rowsTable = $('#'+id_tabla).find('tbody > tr');
     rowsTable.each(function(){arrayNotas.push($(this).find('td > input').val())});
@@ -123,10 +165,11 @@ function guardar_notas(id_tabla) {
     //Niveles Seleccionados
     var rowsTables = $('#'+id_tabla).find('tbody > tr');
     rowsTables.each(function(){arrayNiveles.push($(this).find('td > select').val())});
-        
+    
     var json_ids = JSON.stringify(arrayIDs);
     var json_notas = JSON.stringify(arrayNotas);
     var json_niveles = JSON.stringify(arrayNiveles);
+    
     $.ajax({
         url: url,
         //csrfmiddlewaretoken: csrftoken,

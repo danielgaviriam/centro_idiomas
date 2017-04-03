@@ -21,7 +21,9 @@ urlpatterns = [
     url(r'^eliminar/(?P<id_cita>\d+)/$',eliminar_cita, name='eliminar_cita'), 
     url(r'^agendar_citas/',agendar_citas, name='agendar_citas'),
     url(r'^enviar_citas/',enviar_citas, name='enviar_citas'),    
-
+    
+    #Financiera
+    url(r'^matricula_financiera/',confirmar_matriculas, name='confirmar_matriculas'),    
     #Reportes
     url(r'^report/',reporte_examenes, name='reporte_examenes'),    
     #Ajax :)

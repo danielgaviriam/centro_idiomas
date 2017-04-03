@@ -104,8 +104,8 @@ def nueva_inscripcion(request):
                     persona_almacenada = Persona.objects.get(num_identificacion=persona.num_identificacion)
                     inscripcion.persona = persona_almacenada
                     inscripcion.save()
-                    #Agendar la solicitud
-                    #alamacenamiento = agendar_inscripcion(inscripcion)
+                    
+                    alamacenamiento = agendar_inscripcion(inscripcion)
                     
                     
                     
@@ -382,10 +382,6 @@ def reporte_examenes(request):
     return response
 
 
-def confirmar_matriculas(request):
-    form = DocumentosForm()
-    return render(request,'inscripcion/admin/carga_financiera.html',{'form':form})
-
 
 #AJAX
 
@@ -400,12 +396,11 @@ def guardar_notas_ajax(request):
         niveles = json.loads(request.POST.get('niveles'))
         if notas[0] != None:
             #Validacion de Notas
+            for i in range(0, len(notas)):
+                if float(notas[i]) < 0.0:
+                    return HttpResponse(1)
             for i in range(0, len(ids)):
-                print str(notas[i])
-                if notas[i] == "":
-                    Inscripcion_Examen.objects.filter(pk=ids[i]).update(nota=None,nivel_sugerido=niveles[i])
-                else:
-                    Inscripcion_Examen.objects.filter(pk=ids[i]).update(nota=notas[i],nivel_sugerido=niveles[i])
+                Inscripcion_Examen.objects.filter(pk=ids[i]).update(nota=notas[i],nivel_sugerido=niveles[i])
             return HttpResponse(0)
         else:
             for i in range(0, len(ids)):

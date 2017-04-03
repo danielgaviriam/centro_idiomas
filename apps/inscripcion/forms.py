@@ -17,7 +17,6 @@ class PersonaForm(forms.ModelForm):
             'email',
             'edad',
             'genero',
-            'numero_consignacion',
             'discapacidad',
             'nombre_acudiente',
             'telefono_acudiente',
@@ -34,7 +33,6 @@ class PersonaForm(forms.ModelForm):
             'email':'Email',
             'edad':'Fecha de Nacimiento',
             'genero':'Sexo',
-            'numero_consignacion':'Número de Consignación',
             'discapacidad':'Tiene alguna discapacidad',
             'nombre_acudiente': 'Nombre del Acudiente o contacto',
             'telefono_acudiente':'Celcular del Acudiente o contacto',
@@ -51,7 +49,6 @@ class PersonaForm(forms.ModelForm):
             'email':forms.TextInput(attrs={'class':'form-control','type':'email'}),
             'edad':forms.TextInput(attrs={'class':'form-control','type':'date'}), 
             'genero':forms.Select(attrs={'class':'form-control'}),
-            'numero_consignacion':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             'discapacidad':forms.Select(attrs={'class':'form-control'}),
             'nombre_acudiente':forms.TextInput(attrs={'class':'form-control'}),
             'telefono_acudiente':forms.TextInput(attrs={'class':'form-control','type':'number'}),
@@ -66,16 +63,19 @@ class InscripcionForm(forms.ModelForm):
         fields = [    
             'idioma',
             'sol_examen',
+            'numero_consignacion',
             ]
             #labels
         labels = {
             'idioma':'Idioma',
             'sol_examen':'Examen de Clasificación',
+            'numero_consignacion':'Número de Consignación',
             }
             #para poder dar clases a los campos
         widgets = {
             'idioma':forms.Select(attrs={'class':'form-control'}),
             'sol_examen':forms.RadioSelect(choices=[('1', 'True'), ('2', 'False')]),
+            'numero_consignacion':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             }
             
 class ExamenForm(forms.ModelForm):
@@ -107,4 +107,3 @@ class DocumentosForm(forms.ModelForm):
         labels = {
             'file_cedula':'Cargar Archivo',
             }
-

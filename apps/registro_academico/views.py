@@ -75,7 +75,8 @@ def existen_citas(id_idioma, id_edad):
     cantidad_citaciones = Citacion.objects.filter(idioma=id_idioma,edad=id_edad).count()
     return cantidad_citaciones
 
-from ..inscripcion.views import Inscripcion
+from ..inscripcion.views import agendar_inscripcion
+from ..inscripcion.models import Inscripcion
 
 def agendar_citas(request):
     
@@ -102,6 +103,11 @@ def agendar_citas(request):
                 citacion.idioma=idioma
                 citacion.save()
                 tap = idioma.nombre
+                
+                inscripciones_pendientes = Inscripcion.objects.filter(cita_examen_creada=False)
+                for inscripcion in inscripciones_pendientes:
+                    val = agendar_inscripcion(inscripcion)
+                
             except:
                 messages.error(request, "Esta intentando ingresar valores invalidos")
                 tap = request.GET.get('tap')    
@@ -145,46 +151,8 @@ def agendar_citas(request):
         contexto['tap']="Frances"
         contexto['citaciones']=forms
         
-        posibles_citas_adultos = []
-        citas_no_asignables_adultos = []
-        posibles_citas_ninos = []
-        citas_no_asignables_ninos = []
-        
-        #Adultos
-        control_loop =  cantidad_citas_disponibles_adultos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_adultos:
-            if iterator == control_loop:
-                break
-            posibles_citas_adultos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_adultos:
-            
-            if not preinscripcion in posibles_citas_adultos:
-                citas_no_asignables_adultos.append(preinscripcion)
-                
-        #Ninos
-        control_loop =  cantidad_citas_disponibles_ninos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_ninos:
-            if iterator == control_loop:
-                break
-            posibles_citas_ninos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_ninos:
-            
-            if not preinscripcion in posibles_citas_ninos:
-                citas_no_asignables_ninos.append(preinscripcion)
-            
-        
-        contexto['citaciones_disponibles_adultos']=posibles_citas_adultos
-        contexto['citaciones_no_disponibles_adultos']=citas_no_asignables_adultos
-        contexto['citaciones_disponibles_ninos']=posibles_citas_ninos
-        contexto['citaciones_no_disponibles_ninos']=citas_no_asignables_ninos
+        contexto['citaciones_no_disponibles_adultos']=preinscripciones_adultos
+        contexto['citaciones_no_disponibles_ninos']=preinscripciones_ninos 
         
         return render(request,'inscripcion/admin/agendar_citas.html',contexto)
         
@@ -222,46 +190,8 @@ def agendar_citas(request):
         contexto['tap']="Italiano"
         contexto['citaciones']=forms
         
-        posibles_citas_adultos = []
-        citas_no_asignables_adultos = []
-        posibles_citas_ninos = []
-        citas_no_asignables_ninos = []
-        
-        #Adultos
-        control_loop =  cantidad_citas_disponibles_adultos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_adultos:
-            if iterator == control_loop:
-                break
-            posibles_citas_adultos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_adultos:
-            
-            if not preinscripcion in posibles_citas_adultos:
-                citas_no_asignables_adultos.append(preinscripcion)
-                
-        #Ninos
-        control_loop =  cantidad_citas_disponibles_ninos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_ninos:
-            if iterator == control_loop:
-                break
-            posibles_citas_ninos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_ninos:
-            
-            if not preinscripcion in posibles_citas_ninos:
-                citas_no_asignables_ninos.append(preinscripcion)
-            
-        
-        contexto['citaciones_disponibles_adultos']=posibles_citas_adultos
-        contexto['citaciones_no_disponibles_adultos']=citas_no_asignables_adultos
-        contexto['citaciones_disponibles_ninos']=posibles_citas_ninos
-        contexto['citaciones_no_disponibles_ninos']=citas_no_asignables_ninos
+        contexto['citaciones_no_disponibles_adultos']=preinscripciones_adultos
+        contexto['citaciones_no_disponibles_ninos']=preinscripciones_ninos 
         
         return render(request,'inscripcion/admin/agendar_citas.html',contexto)
         
@@ -298,48 +228,8 @@ def agendar_citas(request):
         contexto['tap']="Portugues"
         contexto['citaciones']=forms
         
-        posibles_citas_adultos = []
-        citas_no_asignables_adultos = []
-        posibles_citas_ninos = []
-        citas_no_asignables_ninos = []
-        
-        #Adultos
-        control_loop =  cantidad_citas_disponibles_adultos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_adultos:
-            if iterator == control_loop:
-                break
-            posibles_citas_adultos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_adultos:
-            if (existen_citas(idioma.id,1) == 0):
-                citas_no_asignables_adultos.append(preinscripcion)
-            if not preinscripcion in posibles_citas_adultos:
-                citas_no_asignables_adultos.append(preinscripcion)
-                
-        #Ninos
-        control_loop =  cantidad_citas_disponibles_ninos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_ninos:
-            if iterator == control_loop:
-                break
-            posibles_citas_ninos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_ninos:
-            if (existen_citas(idioma.id,2) == 0):
-                citas_no_asignables_ninos.append(preinscripcion)
-                
-            if not preinscripcion in posibles_citas_ninos:
-                citas_no_asignables_ninos.append(preinscripcion)
-            
-        contexto['citaciones_disponibles_adultos']=posibles_citas_adultos
-        contexto['citaciones_no_disponibles_adultos']=citas_no_asignables_adultos
-        contexto['citaciones_disponibles_ninos']=posibles_citas_ninos
-        contexto['citaciones_no_disponibles_ninos']=citas_no_asignables_ninos
+        contexto['citaciones_no_disponibles_adultos']=preinscripciones_adultos
+        contexto['citaciones_no_disponibles_ninos']=preinscripciones_ninos 
         
         return render(request,'inscripcion/admin/agendar_citas.html',contexto)
         
@@ -381,51 +271,8 @@ def agendar_citas(request):
         contexto['tap']="Ingles"
         contexto['citaciones']=forms
         
-        posibles_citas_adultos = []
-        citas_no_asignables_adultos = []
-        posibles_citas_ninos = []
-        citas_no_asignables_ninos = []
-        
-        #Adultos
-        control_loop =  cantidad_citas_disponibles_adultos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_adultos:
-            if iterator == control_loop:
-                break
-            posibles_citas_adultos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_adultos:    
-            
-            if (existen_citas(idioma.id,1) == 0):
-                citas_no_asignables_adultos.append(preinscripcion)
-            if not preinscripcion in posibles_citas_adultos:
-                citas_no_asignables_adultos.append(preinscripcion)
-                
-        #Ninos
-        control_loop =  cantidad_citas_disponibles_ninos
-        iterator = 0    
-        
-        for preinscripcion in preinscripciones_ninos:
-            if iterator == control_loop:
-                break
-            posibles_citas_ninos.append(preinscripcion)
-            iterator += 1
-        
-        for preinscripcion in preinscripciones_ninos:
-            
-            if (existen_citas(idioma.id,2) == 0):
-                citas_no_asignables_ninos.append(preinscripcion)
-                
-            if not preinscripcion in posibles_citas_ninos:
-                citas_no_asignables_ninos.append(preinscripcion)
-            
-        
-        contexto['citaciones_disponibles_adultos']=posibles_citas_adultos
-        contexto['citaciones_no_disponibles_adultos']=citas_no_asignables_adultos
-        contexto['citaciones_disponibles_ninos']=posibles_citas_ninos
-        contexto['citaciones_no_disponibles_ninos']=citas_no_asignables_ninos    
+        contexto['citaciones_no_disponibles_adultos']=preinscripciones_adultos
+        contexto['citaciones_no_disponibles_ninos']=preinscripciones_ninos    
         
         return render(request,'inscripcion/admin/agendar_citas.html',contexto)
 
@@ -434,8 +281,16 @@ def agendar_citas(request):
 from ..inscripcion.tables import CitacionTable
 import json
 from django.core import serializers
+import datetime
 
 def listar_citas(request):
+    
+    #Si usario no es anonimo? (ya esta log)
+    role = get_user_role(request.user)
+    if request.user.is_anonymous() or role == Estudiante:
+        #Redireccion a Raiz
+        return HttpResponseRedirect('/index')
+    
     contexto={
         
     }
@@ -466,7 +321,7 @@ def listar_citas(request):
             if inscripcion.persona.mayor_de_edad == citacion_mayor_edad:
                 inscripcion.cita_examen_creada=True
                 inscripcion.save()
-                solicitud = Inscripcion_Examen(inscripcion=inscripcion, citacion = citacion, citacion_enviada=False, nota=-1)
+                solicitud = Inscripcion_Examen(inscripcion=inscripcion, citacion = citacion, citacion_enviada=False)
                 solicitud.save()
                 iterator+=1
         
@@ -474,14 +329,25 @@ def listar_citas(request):
     lista =[]
     registros = Inscripcion_Examen.objects.filter(inscripcion__cita_examen_creada=True,inscripcion__idioma=idioma)
     for registro in registros:
+        
+        citaciones_disponibles = Citacion.objects.filter(edad = registro.citacion.edad,fecha_examen__gte = datetime.date.today()).exclude(pk=registro.citacion.id)
+        
+        citas_disponibles = []
+        for citas in citaciones_disponibles:
+            cupos = cupos_disponbiles(citas.id)
+            if cupos >0 :
+                citas_disponibles.append(citas)
+        
         form = ExamenForm(instance = registro)
         obj={
-            
             'registro':registro,
-            'form':form
+            'form':form,
+            'citas_disponibles':citas_disponibles,
         }
         lista.append(obj)
     
+    contexto['current_date']=datetime.date.today()
+    contexto['tap']=idioma1
     contexto['citaciones']=citaciones
     contexto['citas']=lista
     tabla = CitacionTable()

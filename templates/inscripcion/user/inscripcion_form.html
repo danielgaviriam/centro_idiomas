@@ -18,9 +18,10 @@
             </div>
             {% endfor %}
         {% endif %}
-        <form method='POST'>
+        <form  method='POST'>
             {% csrf_token %}
             <h3>Nueva Solicitud</h3>
+            <div class="well well-sm">
             <div class="form-group">
                 {{form2.idioma.label_tag}}
                 {{form2.idioma}}
@@ -33,6 +34,12 @@
                     <option value="No deseo presentar examen">No deseo presentar examen</option>
                 </select>
                 <small id="emailHelp" class="form-text text-muted">Si usted tiene un conocimiento superior al básico o al de principiante, debe solicitar Examen de clasificación.</small>
+            </div>
+            <div class="form-group">
+                {{form2.numero_consignacion.label_tag}}
+                {{form2.numero_consignacion}}
+                <small id="emailHelp" class="form-text text-muted">Número de la consignación realizada en el banco correspondiente a la inscripcion.</small>
+            </div>
             </div>
             <hr size="50">
             <h3>Información Personal</h3>
@@ -73,11 +80,6 @@
             <div class="form-group">
                 {{form.genero.label_tag}}
                 {{form.genero}}
-            </div>
-            <div class="form-group">
-                {{form.numero_consignacion.label_tag}}
-                {{form.numero_consignacion}}
-                <small id="emailHelp" class="form-text text-muted">Número de la consignación realizada en el banco correspondiente a la inscripcion.</small>
             </div>
             <div class="form-group">
                 {{form.discapacidad.label_tag}}

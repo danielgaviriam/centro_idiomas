@@ -38,6 +38,7 @@
             {% if user|has_role:'administrador' %}
             <li><a href="{% url 'inscripcion:inscripcion_nuevo' %}">Nueva Inscripcion</a></li>
             <li><a href="{% url 'inscripcion:agendar_citas' %}">Gestion de Examenes</a></li>
+            <li><a href="{% url 'inscripcion:confirmar_matriculas' %}">Confirmar matriculas (Financiera)</a></li>
             {% endif %}
           </ul>
         </li>

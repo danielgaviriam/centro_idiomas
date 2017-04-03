@@ -1,0 +1,42 @@
+{% extends '../templates/base/base.html' %}
+
+{% block title %}Actualización de Matriculas{% endblock %}
+{% block content %}
+    <div class="col-md-8 col-md-offset-2 ">
+        <center>
+        <h4>Carga de registros enviados por Financiera</h3>
+        <form method='POST'>
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type='submit'>Guardar</button>
+        </form>
+        </center>
+        <br>
+        <h3>Matriculas Aprobadas</h4>
+        <table class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:20%"># Documento</th>
+                    <th class="text-center" style="width:25%">Nombre</th>
+                    <th class="text-center" style="width:8%"># Consignación</th>
+                    <th class="text-center" style="width:27%">Fecha de Consignacion</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <h4>Matriculas no encontradas</h4>
+        <table class="table table-striped table-bordered" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:20%"># Documento</th>
+                    <th class="text-center" style="width:25%">Nombre</th>
+                    <th class="text-center" style="width:8%"># Consignación</th>
+                    <th class="text-center" style="width:27%">Fecha de Consignacion</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

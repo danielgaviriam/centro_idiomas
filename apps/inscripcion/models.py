@@ -8,8 +8,6 @@ from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator
 from ..registro_academico.models import *
 
-
-
 # Create your models here.
 
 from django.core.validators import MinValueValidator
@@ -25,7 +23,6 @@ class Persona(models.Model):
     mayor_de_edad = models.BooleanField(blank=True)
     discapacidad = models.ForeignKey(Discapacidad,null=True,blank=True)
     genero = models.ForeignKey(Genero,blank=False)
-    numero_consignacion = models.BigIntegerField(blank=False)
     #Datos Acudiente/Contacto 
     nombre_acudiente = models.CharField(max_length=50,blank=False)
     telefono_acudiente = models.BigIntegerField(blank=False)
@@ -41,6 +38,7 @@ class Persona(models.Model):
 #Modelo de Pre-Inscripcion
 class Inscripcion(models.Model):
     persona = models.ForeignKey(Persona,blank=False)
+    numero_consignacion = models.BigIntegerField(blank=False)
     idioma = models.ForeignKey(Idioma,blank=False)
     sol_examen = models.BooleanField()
     estado_inscripcion = models.BooleanField()
@@ -65,7 +63,7 @@ class Solicitud_Continuacione(models.Model):
         return '{} {} {}'.format(self.persona.nombres, self.pre_curso.nombre, self.pre_curso.nivel)
 
 class Inscripcion_Examen(models.Model):
-    nota = models.FloatField(null=True)
+    nota = models.FloatField(null=True, blank=True)
     inscripcion = models.ForeignKey(Inscripcion)
     citacion = models.ForeignKey(Citacion,)
     citacion_enviada = models.BooleanField()
