@@ -8,8 +8,8 @@ from views import *
 urlpatterns = [
     url(r'^nuevo/',nueva_inscripcion, name='inscripcion_nuevo'),
     url(r'^solicitud_nuevo_idioma/',nuevo_idioma_inscripcion, name='inscripcion_nuevo_idioma'),
-    url(r'^interfaz_continudad/',interfaz_continudad, name='interfaz_continudad'),
-    url(r'^agregar_continuidad/',formulario_de_continuacion, name='formulario_de_continuacion'),
+    #url(r'^interfaz_continudad/',interfaz_continudad, name='interfaz_continudad'),
+    #url(r'^agregar_continuidad/',formulario_de_continuacion, name='formulario_de_continuacion'),
     url(r'^gestion_inscripciones/',gestion_inscripciones, name='gestion_inscripciones'),
     url(r'^editar_inscripcion/(?P<id_inscripcion>\d+)/',editar_inscripcion, name='editar_inscripcion'),
     url(r'^eliminar_inscripcion/(?P<id_inscripcion>\d+)/',eliminar_inscripcion, name='eliminar_inscripcion'),
@@ -29,5 +29,6 @@ urlpatterns = [
     #Ajax :)
     url(r'^cita_ajax/',nueva_citacion_ajax, name='nueva_citacion_ajax'),
     url(r'^guardar_notas/',guardar_notas_ajax, name='guardar_notas_ajax'),
+    url(r'^get_frajas/',get_franjas, name='get_franjas'),
     
 ]

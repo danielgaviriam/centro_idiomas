@@ -28,9 +28,59 @@
                 <small id="emailHelp" class="form-text text-muted">Si usted tiene un conocimiento superior al básico o al de principiante, debe solicitar Examen de clasificación.</small>
             </div>
             
+            <div class="form-group">
+            {{form.numero_consignacion.label_tag}}
+            {{form.numero_consignacion}}
+            </div>
+            
+            <div class="form-group">
+                <label for="solicitud_examen">Franjas Disponibles</label>
+                <div id=franjas>
+                    <small class="form-text text-muted">Por favor seleccione un Idioma</small>
+                </div>
+            </div>
+            
             <button class="btn btn-success" type='submit'>Guardar</button>
             
             <a href="https://centro-idiomas-daniel-gaviria.c9users.io/index/" class="btn btn-danger" type='submit'>Cancelar</a>
         </form>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+
+function getFranjas(){
+    var select_idioma = document.getElementById('id_idioma');
+    var idioma = select_idioma.options[select_idioma.selectedIndex].value;
+    var url="/inscripcion/get_frajas/"
+    $.ajax({
+        url: url,
+        data: {'idioma':idioma},
+        type: 'POST',
+        success: function(response_data)
+        {
+            obj = JSON.parse(response_data);
+            if(obj.length==0){
+                $("#franjas").empty();
+                $("#franjas").append('<p>No existen franjas disponibles para mostrar.</p>');
+            }
+            else{
+                $("#franjas").empty();
+                for (var i = 0; i < obj.length; i++) { 
+                    $("#franjas").append('<div class="radio"><label><input name="franja" type="radio" value="'.concat(String(obj[i].id)).concat('"><strong>').concat(String(obj[i].nombre)).concat('</strong></label><br>'))
+                    var list = obj[i].horarios;
+                    for (var j = 0; j < list.length; j++) {
+                        $("#franjas").append(String(list[j].dia).concat(' / ').concat(String(list[j].inicio)).concat(' - ').concat(String(list[j].fin)).concat('<br>'));
+                    }
+                    $("#franjas").append('</div>');
+                }
+                
+            }
+                
+        }
+    });
+}
+
+</script>
 {% endblock %}

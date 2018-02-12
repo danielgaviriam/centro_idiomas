@@ -22,6 +22,8 @@ class RegistroForm(UserCreationForm):
             'last_name',
             'email',
             'username',
+            'password1',
+            'password2',
             #'Rol',
         ]
         labels = {
@@ -29,12 +31,14 @@ class RegistroForm(UserCreationForm):
             'last_name':'Apellidos',
             'email':'Email',
             'username':'Nombre de Usuario',
-            #'Rol':'Rol de Sistema',
+            'password1':'Contrasena',
+            'password2':'Confirmacion de Contrasena',
         }
         widgets = {
 			'first_name':forms.TextInput(attrs={'class':'form-control'}),
 			'last_name':forms.TextInput(attrs={'class':'form-control'}),
 			'email':forms.TextInput(attrs={'class':'form-control', 'type':'email'}),
 			'username':forms.TextInput(attrs={'class':'form-control'}),
-			#'Rol':forms.Select(attrs={'class':'form-control'}),
+			'password1':forms.TextInput(attrs={'class':'form-control','type':'password'}),
+			'password2':forms.TextInput(attrs={'class':'form-control','type':'password'}),
 		}

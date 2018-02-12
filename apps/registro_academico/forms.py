@@ -15,7 +15,6 @@ class CursoForm(forms.ModelForm):
             'sede',
             'idioma',
             'nivel',
-            'jornada',
             'edad',
             ]
             #labels
@@ -24,7 +23,6 @@ class CursoForm(forms.ModelForm):
             'sede':'Sede Curso',
             'idioma':'Idioma Curso',
             'nivel':'Nivel Curso',
-            'jornada':'Jornada Curso',
             'edad':'Edades Curso',
             }
             #para poder dar clases a los campos
@@ -33,7 +31,6 @@ class CursoForm(forms.ModelForm):
             'idioma':forms.Select(attrs={'class':'form-control'}),
             'sede':forms.Select(attrs={'class':'form-control'}),
             'nivel':forms.Select(attrs={'class':'form-control'}),
-            'jornada':forms.Select(attrs={'class':'form-control'}),
             'edad':forms.Select(attrs={'class':'form-control'}),
             }
             
@@ -52,6 +49,7 @@ class CitacionForm(forms.ModelForm):
             'edad',
             'salon',
             'numero_estudiantes',
+            'responsable'
             ]
             #labels
         labels = {
@@ -61,6 +59,7 @@ class CitacionForm(forms.ModelForm):
             'edad':'Tipo de Examen',
             'salon':'Ubicacion',
             'numero_estudiantes':'Capacidad Examen',
+            'responsable':'Responsable examen',
             }
             #para poder dar clases a los campos
         widgets = {
@@ -70,5 +69,6 @@ class CitacionForm(forms.ModelForm):
             'edad':forms.Select(attrs={'class':'form-control'}),
             'salon':forms.TextInput(attrs={'class':'form-control'}),
             'numero_estudiantes':forms.TextInput(attrs={'class':'form-control','type':'number'}),
+            'responsable':forms.Select(attrs={'class':'form-control'}),
             }
             

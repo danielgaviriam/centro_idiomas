@@ -2,6 +2,7 @@
     {% block title %} Registro_Usuario {% endblock %}
     
     {% block content %}
+    <div class="col-md-6 col-md-offset-3">
         {% if messages %}
             {% for message in messages %}
                 {{ message }}
@@ -10,14 +11,40 @@
         
         <form method='POST'>
             {% csrf_token %}
-            {{formulario.as_p}}
-            <label for="permisos">Permisos de Usuario</label>
-            <select class="form-control" name="permisos" id="permisos">
-                {% for rol in roles %}
-                <option value="{{ rol.nombre_usuario }}">{{ rol.nombre_usuario }}</option>
-                {% endfor %}
-            </select>
-            
+            <div class="form-group">
+            {{formulario.first_name.label_tag}}
+            {{formulario.first_name}}
+            </div>
+            <div class="form-group">
+            {{formulario.last_name.label_tag}}
+            {{formulario.last_name}}
+            </div>
+            <div class="form-group">
+            {{formulario.email.label_tag}}
+            {{formulario.email}}
+            </div>
+            <div class="form-group">
+            {{formulario.username.label_tag}}
+            {{formulario.username}}
+            </div>
+            <div class="form-group">
+            {{formulario.password1.label_tag}}
+            {{formulario.password1}}
+            </div>
+            <div class="form-group">
+            {{formulario.password2.label_tag}}
+            {{formulario.password2}}
+            </div>
+            <div class="form-group">
+                <label for="permisos">Permisos de Usuario</label>
+                <select class="form-control" name="permisos" id="permisos">
+                    <option value="-">------------</option>
+                    {% for rol in roles %}
+                    <option value="{{ rol.nombre_usuario }}">{{ rol.nombre_usuario }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <button type='submit'>Guardar</button>
         </form>
+    </div>
     {% endblock %}

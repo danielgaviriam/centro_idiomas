@@ -12,6 +12,7 @@ from ..registro_academico.models import *
 
 from django.core.validators import MinValueValidator
 class Persona(models.Model):
+    numero_consignacion = models.BigIntegerField(blank=False)
     tipo_identificacion = models.ForeignKey(Identificacion,blank=False)
     num_identificacion = models.BigIntegerField(blank=False)
     nombres = models.CharField(max_length=50,blank=False)
@@ -37,13 +38,13 @@ class Persona(models.Model):
 
 #Modelo de Pre-Inscripcion
 class Inscripcion(models.Model):
-    persona = models.ForeignKey(Persona,blank=False)
-    numero_consignacion = models.BigIntegerField(blank=False)
+    persona = models.ForeignKey(Persona, blank=True)
+    numero_consignacion = models.BigIntegerField(blank=True,null=True)
     idioma = models.ForeignKey(Idioma,blank=False)
-    sol_examen = models.BooleanField()
-    estado_inscripcion = models.BooleanField()
-    cita_examen_creada = models.BooleanField()
-    #ciclo_academico = models.ForeignKey(Ciclo,null=True,blank=True)
+    sol_examen = models.BooleanField(blank=True)
+    estado_inscripcion = models.BooleanField(blank=True)
+    cita_examen_creada = models.BooleanField(blank=True)
+    franja = models.ForeignKey(Franja, blank=True)
 
     def __str__(self):
         return '{} {}'.format(self.idioma, self.persona.nombres)

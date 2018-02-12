@@ -33,12 +33,24 @@ def registro_usuarios(request):
                 user = User.objects.get(username= request.POST['username'])
                 assign_role(user,'administrador')
                 return HttpResponseRedirect('/index')
+            elif request.POST.get('permisos') == 'Calificador':
+                usuario = user_form.save(commit=False)
+                usuario = User(username=request.POST['username'], email=request.POST['email'], first_name=request.POST['first_name'], last_name=request.POST['last_name'])
+                usuario.set_password(request.POST['password1'])
+                usuario.save()
+                user = User.objects.get(username= request.POST['username'])
+                assign_role(user,'calificador')
+            else:
+                user_form = RegistroForm(request.POST)
+                roles = Usuario_permisos.objects.all().order_by('id')
         else:
-            user_form = RegistroForm()
+            user_form = RegistroForm(request.POST)
             roles = Usuario_permisos.objects.all().order_by('id')
     else:
         user_form = RegistroForm()
         roles = Usuario_permisos.objects.all().order_by('id')
+    
+    roles = Usuario_permisos.objects.all().order_by('id')
         
     contexto = {
         'formulario':user_form,'roles':roles
@@ -87,6 +99,44 @@ def inicio_sesion(request):
     }
 
     return render(request,  'login.html', context=contexto)
+    
+
+@csrf_protect
+def inicio_sesion_page(request):
+    #Si usario no es anonimo? (ya esta log)
+    if not request.user.is_anonymous():
+        #Redireccion a Raiz
+        return HttpResponseRedirect('/index')
+    #Validacion del Formulario a traves del metodo POST
+    if request.method == 'POST':
+        formulario = UserAuthenticationForm(request.POST)
+        
+        if formulario.is_valid:
+            username = request.POST['username']
+            password = request.POST['password']
+            acceso_user = authenticate(username = username, password = password)
+            # Si el log fue existoso?
+            if acceso_user is not None:
+                #si el usuario esta activo
+                if acceso_user.is_active:
+                    #Login
+                    login(request,acceso_user)
+                    #Redireccion al origen
+                    return HttpResponseRedirect('/bienvenido')
+                else:
+                    messages.add_message(request, messages.INFO, 'Error')
+            else:
+                messages.add_message(request, messages.INFO, 'Por favor revisa tu usuario o password')
+        else:
+            messages.add_message(request, messages.INFO, 'Error')
+    else:
+        formulario = UserAuthenticationForm()
+        
+    contexto = {
+        'formulario': formulario
+    }
+
+    return render(request,  'login_page.html', context=contexto)
             
 
 def cerrar_sesion(request):
@@ -98,3 +148,7 @@ def cerrar_sesion(request):
 
 def index(request):
     return render(request, 'index.html')
+
+def bienvenido(request):
+    return render(request, 'bienvenido.html')
+    

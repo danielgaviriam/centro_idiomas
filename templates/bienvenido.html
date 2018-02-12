@@ -1,0 +1,15 @@
+{% extends '../templates/base/base.html' %}
+{% load permission_tags %}
+
+    {% block title %} Bienvenido {% endblock %}
+    {% block content %}
+    <h3>
+        <center>
+            <strong>
+                Bienvenido al Sistema de Información del CLC
+            </strong><br>
+            Presiona, para ingresar<br><br>
+            <a href="/index" target="_blank" class="btn btn-success btn-lg">Entrar</a>
+        </center>
+    </h3>
+    {% endblock %}

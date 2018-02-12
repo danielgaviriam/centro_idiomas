@@ -28,9 +28,46 @@ class Sede(models.Model):
     def __unicode__(self):
         return self.nombre
 
+#Edad (Mayor/Menor de edad)
+class Edad(models.Model):
+    descripcion_edad = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return '{}'.format(self.descripcion_edad)
+        
+    def __unicode__(self):
+        return self.descripcion_edad
+
+class Semana(models.Model):
+    dia = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return '{}'.format(self.dia)
+
+class Horario(models.Model):
+    dia = models.ForeignKey(Semana)
+    hora_inicio = models.TimeField()
+    hora_fin = models.TimeField()
+    
+    def __unicode__(self):
+        return (""+ str(self.dia) + "/" + str(self.hora_inicio) + "/" + str(self.hora_fin) + "/")
+        
+    def __str__(self):
+        return '{} {} {}'.format(self.dia, self.hora_inicio, self.hora_fin)
+
+class Franja(models.Model):
+    nombre = models.CharField(max_length=50)
+    horarios = models.ManyToManyField(Horario)
+    edad = models.ForeignKey(Edad)
+    
+    def __unicode__(self):
+        return (""+ str(self.nombre))
+    
+
 #Idioma (Principal)
 class Idioma(models.Model):
     nombre = models.CharField(max_length=15)
+    franjas = models.ManyToManyField(Franja)
     
     def __str__(self):
         return '{}'.format(self.nombre)
@@ -45,26 +82,6 @@ class Nivel(models.Model):
     
     def __str__(self):
         return '{}'.format(self.nombre)
-
-#Jornada (Horarios)
-class Jornada(models.Model):
-    descripcion_jornada = models.CharField(max_length=50)
-    
-    def __str__(self):
-        return '{}'.format(self.descripcion_jornada)
-        
-    def __unicode__(self):
-        return self.descripcion_jornada
-
-#Edad (Mayor/Menor de edad)
-class Edad(models.Model):
-    descripcion_edad = models.CharField(max_length=20)
-    
-    def __str__(self):
-        return '{}'.format(self.descripcion_edad)
-        
-    def __unicode__(self):
-        return self.descripcion_edad
     
 #Tipo de Identificacion (TI-CC)
 class Identificacion(models.Model):
@@ -79,7 +96,7 @@ class Identificacion(models.Model):
     
 #Discapacidad
 class Discapacidad(models.Model):
-    tipo = models.CharField(max_length=20)    
+    tipo = models.CharField(max_length=50)    
     
     def __str__(self):
         return '{}'.format(self.tipo)
@@ -87,13 +104,16 @@ class Discapacidad(models.Model):
     def __unicode__(self):
         return self.tipo
         
+from django.contrib.auth.models import User
+
 class Citacion(models.Model):
-    fecha_examen = models.DateField(blank=True)
-    sede = models.ForeignKey(Sede,null=True,blank=True)
+    fecha_examen = models.DateField()
+    sede = models.ForeignKey(Sede)
     idioma = models.ForeignKey(Idioma,null=True,blank=True)
-    edad = models.ForeignKey(Edad,null=True,blank=True)
+    edad = models.ForeignKey(Edad)
     salon = models.CharField(max_length=50)
     numero_estudiantes = models.IntegerField()
+    responsable = models.ForeignKey(User)
     
     def __str__(self):
         return '{} {} {} {} {} {}'.format(self.fecha_examen, self.sede, self.idioma, self.edad, self.edad, self.salon)
@@ -107,7 +127,7 @@ class Curso(models.Model):
     sede = models.ForeignKey(Sede,null=True,blank=True)
     idioma = models.ForeignKey(Idioma,null=True,blank=True)
     nivel = models.ForeignKey(Nivel,null=True,blank=True)
-    jornada = models.ForeignKey(Jornada,null=True,blank=True)
+    
     edad = models.ForeignKey(Edad,null=True,blank=True)
     
     def __str__(self):
@@ -138,4 +158,3 @@ class Matricula(models.Model):
     
     def __str__(self):
         return '{} {}'.format(self.curso, self.persona)
-

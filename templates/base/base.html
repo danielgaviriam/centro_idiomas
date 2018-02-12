@@ -18,12 +18,13 @@
         <div class="container-fluid">
             <!-- Brand and toggle get grouped for better mobile display -->
             <div class="navbar-header">
-                <a class="navbar-brand" href="#">Centro Idiomas</a>
+                <a class="navbar-brand" href="{% url 'index' %}">Centro Idiomas</a>
             </div>
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      {% block inscripcion %}
       <ul class="nav navbar-nav">
-        <li><a href="{% url 'index' %}">Inicio</a></li>
+        
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Inscripcion <span class="caret"></span></a>
           <ul class="dropdown-menu">
@@ -31,14 +32,16 @@
             <li><a href="{% url 'inscripcion:inscripcion_nuevo' %}">Nueva Inscripcion</a></li>
             {% endif %}
             {% if user|has_role:'estudiante' %}
-            <li><a href="{% url 'inscripcion:interfaz_continudad' %}">Formulario de Continuidad</a></li>
             <li><a href="{% url 'inscripcion:inscripcion_nuevo_idioma' %}">Solicitud de nuevo Idioma</a></li>
             <li><a href="{% url 'inscripcion:gestion_inscripciones' %}">Editar Inscripciones</a></li>
             {% endif %}
             {% if user|has_role:'administrador' %}
             <li><a href="{% url 'inscripcion:inscripcion_nuevo' %}">Nueva Inscripcion</a></li>
-            <li><a href="{% url 'inscripcion:agendar_citas' %}">Gestion de Examenes</a></li>
+            <li><a href="{% url 'inscripcion:agendar_citas' %}">Gestión de Examenes</a></li>
             <li><a href="{% url 'inscripcion:confirmar_matriculas' %}">Confirmar matriculas (Financiera)</a></li>
+            {% endif %}
+            {% if user|has_role:'calificador' %}
+            <li><a href="{% url 'inscripcion:listar_citas' %}">Gestión Examenes</a></li>
             {% endif %}
           </ul>
         </li>
@@ -51,6 +54,7 @@
         </li>
         {% endif %}
       </ul>
+      {% endblock %}
       <ul class="nav navbar-nav navbar-right">
         <!--<li><button type="button" class="btn btn-default navbar-btn">Iniciar Sesion</button></li>-->
         {% block sesion %}

@@ -27,9 +27,11 @@ def nueva_citacion(request):
             form.save()
             return redirect('inscripcion:agendar_citas')
         else:
-            form = CitacionForm()        
+            form = CitacionForm()
+            form.fields['responsable'].queryset = User.objects.filter(groups__name='calificador')
     else:
         form = CitacionForm()
+        form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
     return render(request,'inscripcion/admin/citacion_form.html',{'form':form})
 
 import json
@@ -70,6 +72,11 @@ def cupos_disponbiles(id_citacion):
     examenes_asignados = Inscripcion_Examen.objects.filter(citacion_id=id_citacion).count()
     
     return (examenes_totales.numero_estudiantes - examenes_asignados)
+
+def cupos_asignados(id_citacion):
+    examenes_asignados = Inscripcion_Examen.objects.filter(citacion_id=id_citacion).count()
+    
+    return (examenes_asignados)
     
 def existen_citas(id_idioma, id_edad):
     cantidad_citaciones = Citacion.objects.filter(idioma=id_idioma,edad=id_edad).count()
@@ -89,38 +96,46 @@ def agendar_citas(request):
     contexto={   
     }
     if request.method == 'POST':
-        id_cita = request.POST.values()
-        if id_cita[6] == "Ingles":
-            idioma = Idioma.objects.get(nombre="Ingles")
-        else:
-            idioma = Idioma.objects.get(nombre=str(id_cita[4]))
-        cita = Citacion.objects.get(pk=id_cita[2])
-        form = CitacionForm(request.POST,instance=cita)
-        tap = str(idioma.nombre)
-        if form.is_valid():
-            try:
+        tipo = str(request.POST.get('id_citacion_save'))
+        idioma=request.POST.get('id_idioma_save')
+        tap=idioma
+        if tipo == "nuevo":
+            form = CitacionForm(request.POST)
+            if form.is_valid():
+                idioma= Idioma.objects.get(nombre=idioma)
                 citacion = form.save(commit=False)
                 citacion.idioma=idioma
                 citacion.save()
-                tap = idioma.nombre
-                
-                inscripciones_pendientes = Inscripcion.objects.filter(cita_examen_creada=False)
+                ## agendamiento de citas
+                inscripciones_pendientes = Inscripcion.objects.filter(cita_examen_creada=False,estado_inscripcion=True,idioma=idioma)
                 for inscripcion in inscripciones_pendientes:
                     val = agendar_inscripcion(inscripcion)
-                
-            except:
+            else:
                 messages.error(request, "Esta intentando ingresar valores invalidos")
-                tap = request.GET.get('tap')    
         else:
-            messages.error(request, "Esta intentando ingresar valores invalidos")
-            tap = request.GET.get('tap')
+            cita = Citacion.objects.get(pk=tipo)
+            cupos = cupos_asignados(tipo)
+            form = CitacionForm(request.POST,instance=cita)
+            if form.is_valid():
+                idioma= Idioma.objects.get(nombre=idioma)
+                citacion = form.save(commit=False)
+                if (citacion.numero_estudiantes - cupos) < 0:
+                    messages.error(request, "Esta intentando ingresar una cantidad de cupos inferior a los cuales ya hay asignados")
+                else:
+                    citacion.idioma=idioma
+                    citacion.save()
+                    inscripciones_pendientes = Inscripcion.objects.filter(cita_examen_creada=False,estado_inscripcion=True,idioma=idioma)
+                    for inscripcion in inscripciones_pendientes:
+                        val = agendar_inscripcion(inscripcion)
+            else:
+                messages.error(request, "Esta intentando ingresar valores invalidos")
     else:
         tap = request.GET.get('tap')
     
     if (tap == "Frances" ):
         #Set variables necesarias para este proceso
         idioma = Idioma.objects.get(nombre="Frances")
-        preinscripciones = Inscripcion.objects.filter(idioma_id=idioma.id,cita_examen_creada=False,sol_examen=True)
+        preinscripciones = Inscripcion.objects.filter(idioma_id=idioma.id,cita_examen_creada=False,sol_examen=True,estado_inscripcion=False)
         preinscripciones_adultos =[] 
         preinscripciones_ninos = [] 
         for preinscripcion in preinscripciones:
@@ -129,7 +144,7 @@ def agendar_citas(request):
             else:
                 preinscripciones_ninos.append(preinscripcion)
         
-        citaciones = Citacion.objects.filter(idioma_id=idioma.id)
+        citaciones = Citacion.objects.filter(idioma_id=idioma.id).order_by('id')
         cantidad_citas_disponibles_adultos = 0
         cantidad_citas_disponibles_ninos = 0
         forms = []
@@ -140,6 +155,7 @@ def agendar_citas(request):
             else: 
                 cantidad_citas_disponibles_ninos += cupos_disponbiles(citacion.id)
             form = CitacionForm(instance=citacion)
+            form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
             obj = { 
                 'id':citacion.id,
                 'idioma':"Frances",
@@ -147,7 +163,15 @@ def agendar_citas(request):
                 'cupos':cupos_disponbiles(citacion.id)
                 }
             forms.append(obj)
-            
+        
+        empty_form=CitacionForm()
+        empty_form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
+        obj2={
+            'idioma':"Frances",
+            'form':empty_form,
+            'nuevo':"nuevo"
+        }
+        forms.append(obj2)
         contexto['tap']="Frances"
         contexto['citaciones']=forms
         
@@ -167,7 +191,7 @@ def agendar_citas(request):
             else:
                 preinscripciones_ninos.append(preinscripcion)
         
-        citaciones = Citacion.objects.filter(idioma_id=idioma.id)
+        citaciones = Citacion.objects.filter(idioma_id=idioma.id).order_by('id')
         cantidad_citas_disponibles_adultos = 0
         cantidad_citas_disponibles_ninos = 0
         forms = []
@@ -178,6 +202,7 @@ def agendar_citas(request):
             else: 
                 cantidad_citas_disponibles_ninos += cupos_disponbiles(citacion.id)
             form = CitacionForm(instance=citacion)
+            form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
             obj = { 
                 'id':citacion.id,
                 'idioma':"Italiano",
@@ -186,7 +211,14 @@ def agendar_citas(request):
                 }
             forms.append(obj)
         
-        
+        empty_form=CitacionForm()
+        empty_form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
+        obj2={
+            'idioma':"Italiano",
+            'form':empty_form,
+            'nuevo':"nuevo"
+        }
+        forms.append(obj2)
         contexto['tap']="Italiano"
         contexto['citaciones']=forms
         
@@ -206,7 +238,7 @@ def agendar_citas(request):
             else:
                 preinscripciones_ninos.append(preinscripcion)
         
-        citaciones = Citacion.objects.filter(idioma_id=idioma.id)
+        citaciones = Citacion.objects.filter(idioma_id=idioma.id).order_by('id')
         cantidad_citas_disponibles_adultos = 0
         cantidad_citas_disponibles_ninos = 0
         forms = []
@@ -217,6 +249,7 @@ def agendar_citas(request):
             else: 
                 cantidad_citas_disponibles_ninos += cupos_disponbiles(citacion.id)
             form = CitacionForm(instance=citacion)
+            form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
             obj = { 
                 'id':citacion.id,
                 'idioma':"Portugues",
@@ -225,6 +258,14 @@ def agendar_citas(request):
                 }
             forms.append(obj)    
         
+        empty_form=CitacionForm()
+        empty_form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
+        obj2={
+            'idioma':"Portugues",
+            'form':empty_form,
+            'nuevo':"nuevo"
+        }
+        forms.append(obj2)
         contexto['tap']="Portugues"
         contexto['citaciones']=forms
         
@@ -244,7 +285,7 @@ def agendar_citas(request):
             else:
                 preinscripciones_ninos.append(preinscripcion)
         
-        citaciones = Citacion.objects.filter(idioma_id=idioma.id)
+        citaciones = Citacion.objects.filter(idioma_id=idioma.id).order_by('id')
         cantidad_citas_disponibles_adultos = 0
         cantidad_citas_disponibles_ninos = 0
         forms = []
@@ -260,6 +301,7 @@ def agendar_citas(request):
                 cantidad_citas_disponibles_ninos += cupos_disponbiles(citacion.id)
                 
             form = CitacionForm(instance=citacion)
+            form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
             obj = { 
                 'id':citacion.id,
                 'idioma':"Ingles",
@@ -268,6 +310,14 @@ def agendar_citas(request):
                 }
             forms.append(obj)
         
+        empty_form=CitacionForm()
+        empty_form.fields["responsable"].queryset = User.objects.filter(groups__name='calificador')
+        obj2={
+            'idioma':"Ingles",
+            'form':empty_form,
+            'nuevo':"nuevo"
+        }
+        forms.append(obj2)
         contexto['tap']="Ingles"
         contexto['citaciones']=forms
         
@@ -305,7 +355,7 @@ def listar_citas(request):
     json_citaciones = serializers.serialize('json', citaciones)
     
     for citacion in citaciones:
-        preinscripciones = Inscripcion.objects.filter(idioma_id=idioma.id,cita_examen_creada=False,sol_examen=True)
+        preinscripciones = Inscripcion.objects.filter(idioma_id=idioma.id,cita_examen_creada=False,sol_examen=True,estado_inscripcion=True)
         citacion_mayor_edad = False
         
         if citacion.edad.descripcion_edad == "Adultos":
@@ -330,7 +380,7 @@ def listar_citas(request):
     registros = Inscripcion_Examen.objects.filter(inscripcion__cita_examen_creada=True,inscripcion__idioma=idioma)
     for registro in registros:
         
-        citaciones_disponibles = Citacion.objects.filter(edad = registro.citacion.edad,fecha_examen__gte = datetime.date.today()).exclude(pk=registro.citacion.id)
+        citaciones_disponibles = Citacion.objects.filter(idioma=registro.citacion.idioma,edad = registro.citacion.edad,fecha_examen__gte = datetime.date.today()).exclude(pk=registro.citacion.id)
         
         citas_disponibles = []
         for citas in citaciones_disponibles:
@@ -350,8 +400,6 @@ def listar_citas(request):
     contexto['tap']=idioma1
     contexto['citaciones']=citaciones
     contexto['citas']=lista
-    tabla = CitacionTable()
-    contexto['tabla']= tabla
     contexto['idioma']=idioma.nombre
     contexto['json_citaciones']=json_citaciones
     

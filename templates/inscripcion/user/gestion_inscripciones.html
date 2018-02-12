@@ -8,11 +8,16 @@
         <br>
         {% if solicitudes %}
             {% for inscripcion in solicitudes %}
-                {{inscripcion.idioma}}
+                <h3><strong>Idioma: </strong>{{inscripcion.idioma}}</h3>
                 {% if inscripcion.sol_examen == True %}
-                    <h5>Ha solicitado examen de Inscripcion</h5>
+                    <h4>Ha solicitado examen de Inscripcion</h4>
                 {% else %}
-                    <h5>No ha solicitado examen de Inscripcion</h5>
+                    <h4>No ha solicitado examen de Inscripcion</h4>
+                {% endif %}
+                {% if inscripcion.estado_inscripcion == False %}
+                <div class="alert alert-danger">
+                    Solicitud pendiente por confirmacion
+                </div>
                 {% endif %}
                 <a href="https://centro-idiomas-daniel-gaviria.c9users.io/inscripcion/editar_inscripcion/{{inscripcion.id}}/" class="btn btn-primary">Editar</a>
                 <a href="https://centro-idiomas-daniel-gaviria.c9users.io/inscripcion/eliminar_inscripcion/{{inscripcion.id}}/" class="btn btn-danger">Eliminar</a>

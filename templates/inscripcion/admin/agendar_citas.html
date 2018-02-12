@@ -33,24 +33,33 @@
                 <div class="list-group">
                     {% if citaciones_no_disponibles_adultos %}
                         {% for citas in citaciones_no_disponibles_adultos %}
-                            <a href="#" class="list-group-item list-group-item-danger" >{{citas.persona.nombres}}</a>
+                            <a class="list-group-item list-group-item-danger" >{{citas.persona.nombres}}
+                            {% if citas.estado_inscripcion == False %}
+                                (Pendiente Aprobacion de inscripcion)
+                            {% else %}
+                                (No hay cupos disponibles)
+                            {% endif %}
+                            </a>
                         {% endfor %}
                     {% else %}
-                        <a href="#" class="list-group-item">No hay solicitudes</a>
+                        <a class="list-group-item">No hay solicitudes</a>
                     {% endif %}
                 </div>
                 <h4>Niños</h4>
                 <div class="list-group">
                     {% if citaciones_no_disponibles_ninos %}
                         {% for citas in citaciones_no_disponibles_ninos %}
-                            <a href="#" class="list-group-item list-group-item-success">{{citas.persona.nombres}}</a>
+                            <a class="list-group-item list-group-item-success">{{citas.persona.nombres}}
+                            {% if citas.estado_inscripcion == False %}
+                                (Pendiente Aprobacion de inscripcion)
+                            {% endif %}</a>
                         {% endfor %}
                     {% else %}
-                        <a href="#" class="list-group-item">No hay solicitudes</a>
+                        <a class="list-group-item">No hay solicitudes</a>
                     {% endif %}
                 </div>
             </div>
-            <div class="col-sm-8" style="background-color:lightcyan;">  
+            <div class="col-sm-9" style="background-color:lightcyan;">  
                 {% if messages %}
                     {% for message in messages %}
                     <div class="alert alert-danger">
@@ -66,31 +75,60 @@
                             <th class="text-center">Sede</th>
                             <th class="text-center">Ubicacion</th>
                             <th class="text-center" style="width:10%;">Cupos</th>
-                            <th class="text-center">Actions</th>                                   
+                            <th class="text-center">Responsable</th>
+                            <th class="text-center">Acciones</th>
                             <th class="text-center">Cupos Disponibles</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for citacion in citaciones %}
+                            {% if citacion.nuevo %}
+                            <tr id="new" style="display:none">
+                                <form method='POST'>
+                                
+                                {% csrf_token %}
+                                <td>{{ citacion.form.fecha_examen }}</td>
+                                <td>{{ citacion.form.edad }}</td>
+                                <td>{{ citacion.form.sede }}</td>
+                                <td>{{ citacion.form.salon }}</td>
+                                <td>{{ citacion.form.numero_estudiantes }}
+                                    <input type="hidden" name="id_citacion_save" value={{citacion.nuevo}}>
+                                    <input type="hidden" name="id_idioma_save" value={{citacion.idioma}}>
+                                </td>
+                                <td>
+                                    {{ citacion.form.responsable }}
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary"type='submit'>Guardar</button>
+                                </td>
+                                </form>
+                                <td align="center"><strong>{{ citacion.cupos }}</strong></td> 
+                            </tr>
+                            {% else %}
                             <tr>
                                 <form method='POST'>{% csrf_token %}
                                 <td>{{ citacion.form.fecha_examen }}</td>
                                 <td>{{ citacion.form.edad }}</td>
                                 <td>{{ citacion.form.sede }}</td>
                                 <td>{{ citacion.form.salon }}</td>
-                                <td>{{ citacion.form.numero_estudiantes }}</td> 
+                                <td>{{ citacion.form.numero_estudiantes }}
+                                    <input type="hidden" name="id_idioma_save" value={{citacion.idioma}}>   
+                                    <input type="hidden" name="id_citacion_save" value={{citacion.id}}>
+                                </td>
+                                <td>
+                                    {{ citacion.form.responsable }}
+                                </td>
                                 <td>
                                     <button class="btn btn-primary"type='submit'>Guardar</button>
-                                    <input type="hidden" name="{{citacion.id}}" style="visibility:hidden" value={{citacion.id}}>
-                                    <input type="hidden" name="{{citacion.idioma}}" style="visibility:hidden" value={{citacion.idioma}}>
                                 </td>
                                 </form>
                                 <td align="center"><strong>{{ citacion.cupos }}</strong></td> 
                             </tr>
+                            {% endif %}
                         {% endfor %}
                     </tbody>    
                 </table>
-                <a href="/inscripcion/nueva_cita/" class="btn btn-success pull-left">Agregar Examen</a>
+                <button class="btn btn-success pull-left" onclick="formulario_citacion()">Agregar Examen</button>
                 <a href="/inscripcion/listar_citas/?tap={{tap}}" class="btn btn-primary pull-right" >Ver agendamiento de Examenes</a>
             </div>
         </div>
@@ -109,8 +147,7 @@
            type: 'GET',
            success: function(response_data)
            {
-               
-               $('#tabla').append('<tr><td>'.concat(response_data.content).concat('</td></tr>'));
+               $('#new').show()
            }
         });
     }

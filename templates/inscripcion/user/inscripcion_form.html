@@ -21,26 +21,6 @@
         <form  method='POST'>
             {% csrf_token %}
             <h3>Nueva Solicitud</h3>
-            <div class="well well-sm">
-            <div class="form-group">
-                {{form2.idioma.label_tag}}
-                {{form2.idioma}}
-                <small id="emailHelp" class="form-text text-muted">Seleccione el Idioma al cual desea inscribirse</small>
-            </div>
-            <div class="form-group">
-                <label for="solicitud_examen">Solicitud de Examen</label>
-                <select class="form-control" name="solicitud_examen" id="solicitud_examen">
-                    <option value="Deseo presentar examen">Deseo presentar examen</option>
-                    <option value="No deseo presentar examen">No deseo presentar examen</option>
-                </select>
-                <small id="emailHelp" class="form-text text-muted">Si usted tiene un conocimiento superior al básico o al de principiante, debe solicitar Examen de clasificación.</small>
-            </div>
-            <div class="form-group">
-                {{form2.numero_consignacion.label_tag}}
-                {{form2.numero_consignacion}}
-                <small id="emailHelp" class="form-text text-muted">Número de la consignación realizada en el banco correspondiente a la inscripcion.</small>
-            </div>
-            </div>
             <hr size="50">
             <h3>Información Personal</h3>
             <div class="form-group">
@@ -86,7 +66,34 @@
                 {{form.discapacidad}}
             </div>
             <hr size="50">
-            <h3>Información de Acudiente o contacto</h3>
+            <div class="well well-sm">
+            <div class="form-group">
+                {{form2.idioma.label_tag}}
+                {{form2.idioma}}
+                <small id="emailHelp" class="form-text text-muted">Seleccione el Idioma al cual desea inscribirse</small>
+            </div>
+            <div class="form-group">
+                <label for="solicitud_examen">Franjas Disponibles</label>
+                <div id=franjas>
+                    <small class="form-text text-muted">Por favor seleccione un Idioma y el campo correspondiente a su fecha de nacimiento</small>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="solicitud_examen">Solicitud de Examen</label>
+                <select class="form-control" name="solicitud_examen" id="solicitud_examen">
+                    <option value="Deseo presentar examen">Deseo presentar examen</option>
+                    <option value="No deseo presentar examen">No deseo presentar examen</option>
+                </select>
+                <small id="emailHelp" class="form-text text-muted">Si usted tiene un conocimiento superior al básico o al de principiante, debe solicitar Examen de clasificación.</small>
+            </div>
+            <div class="form-group">
+                {{form.numero_consignacion.label_tag}}
+                {{form.numero_consignacion}}
+                <small id="emailHelp" class="form-text text-muted">Número de la consignación realizada en el banco correspondiente a la inscripcion.<br>Tenga encuenta que esta NO es la consignación correspondiente al pago del idioma al cual usted desea inscriberse</small>
+            </div>
+            </div>
+            <hr size="50">
+            <h3>Información de acudiente o contacto</h3>
             <div class="form-group">
                 {{form.nombre_acudiente.label_tag}}
                 {{form.nombre_acudiente}}
@@ -99,8 +106,48 @@
                 {{form.email_acudiente.label_tag}}
                 {{form.email_acudiente}}
             </div>
-            <center><button class="btn btn-success btn-lg" type='submit'>Guardar</button></center>
+            <center><button class="btn btn-success btn-lg" type='submit'>Guardar</button>
+            <a href="/index" class="btn btn-default btn-lg" >Cancelar</a>
             <br><br>
         </form>
 </div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+
+function getFranjas(){
+    var select_idioma = document.getElementById('id_idioma');
+    var idioma = select_idioma.options[select_idioma.selectedIndex].value;
+    var array_fecha = document.getElementById('id_edad').value.split('-');
+    var fecha = JSON.stringify(array_fecha);
+    var url="/inscripcion/get_frajas/"
+    $.ajax({
+        url: url,
+        data: {'fecha_nacimiento':fecha,'idioma':idioma},
+        type: 'POST',
+        success: function(response_data)
+        {
+            obj = JSON.parse(response_data);
+            if(obj.length==0){
+                $("#franjas").empty();
+                $("#franjas").append('<p>No existen franjas disponibles para mostrar.</p>');
+            }
+            else{
+                $("#franjas").empty();
+                for (var i = 0; i < obj.length; i++) { 
+                    $("#franjas").append('<div class="radio"><label><input name="franja" type="radio" value="'.concat(String(obj[i].id)).concat('"><strong>').concat(String(obj[i].nombre)).concat('</strong></label><br>'))
+                    var list = obj[i].horarios;
+                    for (var j = 0; j < list.length; j++) {
+                        $("#franjas").append(String(list[j].dia).concat(' / ').concat(String(list[j].inicio)).concat(' - ').concat(String(list[j].fin)).concat('<br>'));
+                    }
+                    $("#franjas").append('</div>');
+                }
+                
+            }
+                
+        }
+    });
+}
+
+</script>
 {% endblock %}

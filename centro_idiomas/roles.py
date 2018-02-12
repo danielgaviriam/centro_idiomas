@@ -14,3 +14,8 @@ class Estudiante(AbstractUserRole):
     available_permissions = {
         
     }
+    
+class Calificador(AbstractUserRole):
+    available_permissions = {
+        
+    }

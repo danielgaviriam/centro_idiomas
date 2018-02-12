@@ -25,20 +25,20 @@ class PersonaForm(forms.ModelForm):
             ]
             #labels
         labels = {
-            'tipo_identificacion':'Tipo de identificación',
-            'num_identificacion':'Numero de identificacion',
+            'tipo_identificacion':'Tipo de Identificación',
+            'num_identificacion':'Numero de Identificacion',
             'nombres':'Nombres',
             'apellidos':'Apellidos',
-            'ciudad':'Ciudad de nacimiento',
-            'tel_contacto':'Telefono de contacto',
+            'ciudad':'Ciudad de Nacimiento',
+            'tel_contacto':'Telefono de Contacto',
             'email':'Email',
-            'edad':'Fecha de nacimiento',
+            'edad':'Fecha de Nacimiento',
             'genero':'Sexo',
             'discapacidad':'Tiene alguna discapacidad',
-            'nombre_acudiente': 'Nombre del acudiente o contacto',
-            'telefono_acudiente':'Celular del acudiente o contacto',
+            'nombre_acudiente': 'Nombre del Acudiente o contacto',
+            'telefono_acudiente':'Celcular del Acudiente o contacto',
             'email_acudiente':'Email del Acudiente o contacto',
-            'numero_consignacion':'Número de consignación (Inscripcion)',
+            'numero_consignacion':'Número de Consignación (Insc',
             }
             #para poder dar clases a los campos
         widgets = {
@@ -49,7 +49,7 @@ class PersonaForm(forms.ModelForm):
             'ciudad':forms.TextInput(attrs={'class':'form-control'}),
             'tel_contacto':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             'email':forms.TextInput(attrs={'class':'form-control','type':'email'}),
-            'edad':forms.TextInput(attrs={'class':'form-control','type':'date', 'onfocusout':'getFranjas()'}), 
+            'edad':forms.TextInput(attrs={'class':'form-control','type':'date'}), 
             'genero':forms.Select(attrs={'class':'form-control'}),
             'discapacidad':forms.Select(attrs={'class':'form-control'}),
             'nombre_acudiente':forms.TextInput(attrs={'class':'form-control'}),
@@ -74,9 +74,9 @@ class InscripcionForm(forms.ModelForm):
             'sol_examen':'Examen de Clasificación',
             'numero_consignacion':'Número de Consignación',
             }
-            #para poder dar clases a los campos 
+            #para poder dar clases a los campos
         widgets = {
-            'idioma':forms.Select(attrs={'class':'form-control','onchange':'getFranjas()'}),
+            'idioma':forms.Select(attrs={'class':'form-control'}),
             'sol_examen':forms.RadioSelect(choices=[('1', 'True'), ('2', 'False')]),
             'numero_consignacion':forms.TextInput(attrs={'class':'form-control','type':'number'}),
             }

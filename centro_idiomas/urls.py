@@ -18,7 +18,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 #from django.contrib.auth.views import login
-from apps.usuario.views import inicio_sesion, index
+from apps.usuario.views import inicio_sesion, index,bienvenido
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -27,4 +27,5 @@ urlpatterns = [
     
     url(r'^$',inicio_sesion, name="login"),
     url(r'^index/',index, name='index'),
+    url(r'^bienvenido/',bienvenido, name='bienvenido'),
 ]

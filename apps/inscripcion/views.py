@@ -49,6 +49,7 @@ def nueva_inscripcion(request):
         form2 = InscripcionForm(request.POST)
         if (form.is_valid() and form2.is_valid()):
             try:
+                franja = request.POST.get('franja')
                 data_persona = form.cleaned_data
                 data_inscripcion = form2.cleaned_data
                 edad_inscripcion = data_persona['edad']
@@ -59,7 +60,10 @@ def nueva_inscripcion(request):
                     messages.error(request, "Su Identificacion ya se encuentra registrada")
                     form = PersonaForm(request.POST)
                     form2 = InscripcionForm(request.POST)
-                    
+                elif(franja == None):
+                    messages.error(request, "Por favor seleccione una franja valida")
+                    form = PersonaForm(request.POST)
+                    form2 = InscripcionForm(request.POST)
                 elif(data_persona['email'] == data_persona['email_acudiente']):
                     messages.error(request, "El email de contacto debe ser diferentes al del usuario")
                     form = PersonaForm(request.POST)
@@ -75,7 +79,7 @@ def nueva_inscripcion(request):
                     form = PersonaForm(request.POST)
                     form2 = InscripcionForm(request.POST)
                     
-                elif(diferencia < 18 and data_persona['tipo_identificacion']!=2):
+                elif(diferencia > 18 and data_persona['tipo_identificacion']==2):
                     messages.error(request, "Su tipo de documento es incorrecto")
                     form = PersonaForm(request.POST)
                     form2 = InscripcionForm(request.POST)
@@ -93,6 +97,7 @@ def nueva_inscripcion(request):
                         inscripcion.sol_examen=True
                     else:
                         inscripcion.sol_examen=False
+                    
                         
                     inscripcion.estado_inscripcion=False
                     inscripcion.cita_examen_creada=False
@@ -103,11 +108,10 @@ def nueva_inscripcion(request):
                     form.save()
                     persona_almacenada = Persona.objects.get(num_identificacion=persona.num_identificacion)
                     inscripcion.persona = persona_almacenada
+                    inscripcion.numero_consignacion = None
+                    franja_seleccionada = Franja.objects.get(id=franja)
+                    inscripcion.franja=franja_seleccionada
                     inscripcion.save()
-                    #Agendar la solicitud
-                    #alamacenamiento = agendar_inscripcion(inscripcion)
-                    
-                    
                     
                     return redirect('index')
             except:
@@ -132,11 +136,11 @@ def nuevo_idioma_inscripcion(request):
     if request.method == 'POST':
         #recibir los datos
         form = InscripcionForm(request.POST)
+        
         if form.is_valid():
-            
+            franja = request.POST.get('franja')
             usuario_actual=request.user
             persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
-            
             
             data_inscripcion = form.cleaned_data
             existe = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).count()
@@ -156,6 +160,8 @@ def nuevo_idioma_inscripcion(request):
                 inscripcion.estado_inscripcion=False
                 inscripcion.cita_examen_creada=False
                 inscripcion.persona = persona_logged
+                franja_seleccionada = Franja.objects.get(id=franja)
+                inscripcion.franja=franja_seleccionada
                 inscripcion.save()    
                 return redirect('inscripcion:gestion_inscripciones')
         else:
@@ -167,6 +173,7 @@ def nuevo_idioma_inscripcion(request):
     
     return render(request,'inscripcion/user/solicitud_nuevo_idioma.html',{'form':form})
 
+"""
 def interfaz_continudad(request):
     if request.user.is_anonymous():
         #Redireccion a Raiz
@@ -234,9 +241,9 @@ def interfaz_continudad(request):
         return render(request,'inscripcion/user/interfaz_continuidad.html',{'informacion':informacion})
     except:
         traceback.print_exc()
-        return render(request,'inscripcion/user/interfaz_continuidad.html')
+        return render(request,'inscripcion/user/interfaz_continuidad.html')"""
     
-
+"""
 def formulario_de_continuacion(request):
     
     #Usuario/Persona logged
@@ -277,7 +284,7 @@ def formulario_de_continuacion(request):
     except:
         traceback.print_exc()
         return HttpResponse(0)
-        
+"""        
 
 def gestion_inscripciones(request):
     #Usuario/Persona logged
@@ -287,7 +294,7 @@ def gestion_inscripciones(request):
     usuario_actual=request.user
     persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
 
-    solicitudes = Inscripcion.objects.filter(persona=persona_logged)
+    solicitudes = Inscripcion.objects.filter(persona=persona_logged).order_by('id')
     contexto ={
         
     }
@@ -301,6 +308,7 @@ def editar_inscripcion(request, id_inscripcion):
     else:
         form = InscripcionForm(request.POST, instance=inscripcion)
         if form.is_valid():
+            franja = request.POST.get('franja')
             usuario_actual=request.user
             persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
             inscripcion = form.save(commit=False)
@@ -313,16 +321,35 @@ def editar_inscripcion(request, id_inscripcion):
                 inscripcion.sol_examen=False
                 solicitud_examen = False
             
-            existe = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).count()
-            
-            
-            if(existe != 0):
-                inscripcion_antigua = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).update(sol_examen=solicitud_examen)
-                return redirect('inscripcion:gestion_inscripciones')
+            if(franja == None):
+                messages.error(request, "Por favor seleccione una franja valida")    
+                form = InscripcionForm(instance=inscripcion)
+                return render(request, 'inscripcion/user/editar_inscripcion.html', {'form':form})
                 
-            else:
+            franja_seleccionada = Franja.objects.get(id=franja)
+            inscripcion.franja=franja_seleccionada
+            
+            existe = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).exclude(pk=id_inscripcion).count()
+            if(existe == 0):
+                #inscripcion_antigua = Inscripcion.objects.filter(persona_id=persona_logged.id,idioma_id = data_inscripcion['idioma']).update(sol_examen=solicitud_examen)
                 inscripcion.save()
+                existe_agenda = Inscripcion_Examen.objects.filter(inscripcion=inscripcion).count()
+                if existe_agenda>0:
+                    eliminar_agenda = Inscripcion_Examen.objects.filter(inscripcion=inscripcion)
+                    eliminar_agenda.delete()
+                if solicitud_examen == False:
+                    inscripcion.cita_examen_creada = False
+                    inscripcion.save()
+                else:
+                    inscripcion.cita_examen_creada = False
+                    inscripcion.save()
+                    if inscripcion.estado_inscripcion == True:
+                        val = agendar_inscripcion(inscripcion)
+                    
                 return redirect('inscripcion:gestion_inscripciones')
+            else:
+                messages.error(request, "Ya ha realizado una inscripcion a este idioma")
+                form = InscripcionForm(instance=inscripcion)
     
     return render(request, 'inscripcion/user/editar_inscripcion.html', {'form':form})
     
@@ -396,12 +423,12 @@ import json
 def guardar_notas_ajax(request):
     if request.method == 'POST':
         ids = json.loads(request.POST.get('ids'))
+        
         notas = json.loads(request.POST.get('notas'))
         niveles = json.loads(request.POST.get('niveles'))
         if notas[0] != None:
             #Validacion de Notas
             for i in range(0, len(ids)):
-                print str(notas[i])
                 if notas[i] == "":
                     Inscripcion_Examen.objects.filter(pk=ids[i]).update(nota=None,nivel_sugerido=niveles[i])
                 else:
@@ -410,7 +437,70 @@ def guardar_notas_ajax(request):
         else:
             for i in range(0, len(ids)):
                 if niveles[i] != "-":
-                    Inscripcion_Examen.objects.filter(pk=ids[i]).update(citacion=niveles[i])
+                    Inscripcion_Examen.objects.filter(pk=ids[i]).update(citacion=niveles[i],citacion_enviada=False)
+                    
             return HttpResponse(0)
+    else:
+        return HttpResponse(1)
+from django.core import serializers
+@csrf_exempt
+def get_franjas(request):
+    if request.method == 'POST':
+        try:
+            if request.user.is_anonymous():
+                fecha = json.loads(request.POST.get('fecha_nacimiento'))
+                fecha_nacimiento = datetime.date(int(fecha[0]), int(fecha[1]), int(fecha[2]))
+                diferencia = int(((datetime.date.today() - fecha_nacimiento).days)/365)
+            else:
+                usuario_actual=request.user
+                persona_logged = Persona.objects.get(usuario_id=usuario_actual.id)
+                fecha_nacimiento = persona_logged.edad
+                diferencia = int(((datetime.date.today() - fecha_nacimiento).days)/365)
+                
+            id_idioma = request.POST.get('idioma')
+            franjas_idioma = Idioma.objects.values_list('franjas').filter(id=id_idioma)
+            
+            ids =[]
+            for identificador in franjas_idioma:
+                ids.append(int(identificador[0]))
+        
+            if diferencia < 17:
+                edad = Edad.objects.get(pk=2)
+                franjas = Franja.objects.filter(pk__in=ids,edad=edad)
+            else:
+                edad = Edad.objects.get(pk=1)
+                franjas = Franja.objects.filter(pk__in=ids,edad=edad)
+            
+            
+            lista_franjas = []    
+            for franja in franjas:
+                horarios_list = Franja.objects.values_list('horarios').filter(id=franja.id)
+                
+                ids = []
+                for identificador in horarios_list:
+                    ids.append(int(identificador[0]))
+                    
+                horarios_asignados = Horario.objects.filter(pk__in=ids)
+                horarios = []
+                for horas in horarios_asignados:
+                    obj = {
+                        'dia':horas.dia.dia,
+                        'inicio':str(horas.hora_inicio),
+                        'fin':str(horas.hora_fin),
+                    }
+                    horarios.append(obj)
+                
+                obj2={
+                    'id':franja.id,
+                    'nombre':franja.nombre,
+                    'horarios':horarios,
+                }
+                lista_franjas.append(obj2)
+            
+            json_p = json.dumps(lista_franjas)
+            return HttpResponse(json_p)
+        except:    
+            traceback.print_exc()
+            return HttpResponse(1)
     else:
         return HttpResponse(1)
